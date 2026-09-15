@@ -37,9 +37,12 @@ services:
         source: ./scripts/install-mods.sh
         target: /home/steam/cs2-dedicated/pre.sh
         read_only: true
+      - type: bind
+        source: ./config
+        target: /opt/cs2ze-config
+        read_only: true
     ports:
       - "${CS2_PUBLISHED_PORT:-27015}:${CS2_PORT:-27015}/tcp"
       - "${CS2_PUBLISHED_PORT:-27015}:${CS2_PORT:-27015}/udp"
       - "${CS2_RCON_PUBLISHED_PORT:-27050}:${CS2_RCON_PORT:-27050}/tcp"
       - "${TV_PUBLISHED_PORT:-27020}:${TV_PORT:-27020}/udp"
-

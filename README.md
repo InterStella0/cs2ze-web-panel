@@ -13,23 +13,24 @@ joedwards32/cs2
 
 The server updates through SteamCMD on every container start. After that update,
 the mounted `pre.sh` hook installs or updates the pinned mod archives, repairs the
-Metamod entry in `gameinfo.gi`, writes the environment-managed plugin settings,
-and starts CS2. Existing plugin configuration files and Stripper map files are
-preserved across mod updates.
+Metamod entry in `gameinfo.gi`, installs the repository's known-good ZE configs,
+writes the environment-managed settings, and starts CS2.
 
 ## Start
 
 Requirements: Docker Engine with Compose v2, 2 CPU cores, at least 2 GiB RAM,
 and at least 60 GB free disk space (more for workshop content).
 
-1. Edit `.env`.
-2. Set `SRCDS_TOKEN` for an Internet server and replace `CS2_RCONPW`.
-3. Optionally set a workshop start map/collection and MultiAddonManager IDs.
-4. Start the server:
+Start the complete server with:
 
-   ```sh
-   docker compose up -d
-   ```
+```sh
+docker compose up -d
+```
+
+The checked-in defaults start `ze_winter_warehouse_p` (Workshop ID
+`3144617784`) with ZombieReborn, weapons, knockback, flashlights, nominations,
+RTV/map voting, and one-player infection testing enabled. For a public Internet
+server, edit `.env` first to set `SRCDS_TOKEN` and replace `CS2_RCONPW`.
 
 The initial Steam download is large and can take a while. Follow it with:
 
@@ -52,8 +53,10 @@ meta list
 
 ## Configuration
 
-All container, port, CS2, version, ZombieReborn, and MultiAddonManager settings
-are in `.env`. `.env.example` is the version-controlled template.
+All container, port, CS2, version, ZombieReborn, voting, and
+MultiAddonManager settings are in `.env`. `.env.example` is the
+version-controlled template. Set `CS2_ADMIN_STEAMID` to your 17-digit SteamID64
+to generate an owner admin entry automatically.
 
 If a CS2 value contains `/`, escape it as `\/` as required by the base image's
 configuration replacement logic.
@@ -68,15 +71,32 @@ Useful entries:
 - `MODS_FORCE_REINSTALL=1`: download all enabled mod archives again on the next
   start. Put it back to `0` afterward.
 
-Advanced config files remain directly editable in the persistent data directory:
+Structured configs are version-controlled under `config/` and copied into the
+game tree on every container start:
+
+- `config/cs2fixes/maplist.jsonc`: nomination and map-vote catalog.
+- `config/cs2fixes/cvar_whitelist.jsonc`: safe map cvars.
+- `config/cs2fixes/admins.jsonc`: harmless fallback when no owner ID is set.
+- `config/cs2fixes/zr/`: human/zombie classes, weapons, and hitgroups.
+- `config/cs2fixes/maps/`: optional per-map CS2Fixes cfg files.
+- `config/stripper/`: optional per-map StripperCS2 files.
+
+Edit those repository files, then run `docker compose up -d --force-recreate`.
+Their generated destinations are:
 
 - `cs2-data/game/csgo/cfg/cs2fixes/cs2fixes.cfg`
+- `cs2-data/game/csgo/addons/cs2fixes/configs/maplist.jsonc`
 - `cs2-data/game/csgo/addons/cs2fixes/configs/zr/`
 - `cs2-data/game/csgo/cfg/multiaddonmanager/multiaddonmanager.cfg`
 - `cs2-data/game/csgo/addons/StripperCS2/maps/`
 
 The installer only replaces its block between `BEGIN CS2ZE MANAGED` and
-`END CS2ZE MANAGED`; it preserves other edits.
+`END CS2ZE MANAGED` in `cs2fixes.cfg`. It deliberately replaces the structured
+files above and `cfg/cs2fixes/server.cfg` from the repository/`.env`, so the
+configuration cannot drift between rebuilds.
+
+Player chat commands include `!guns`, `!zclass`, `!flashlight` (or the flashlight
+key), `!nominate`, and `!rtv`. `!nom` is not a CS2Fixes command.
 
 ## Version compatibility
 
@@ -99,8 +119,9 @@ compatible Steam Runtime.
 ## Operations
 
 ```sh
-# Stop (keeps ./cs2-data)
+# Stop, including with -v (keeps both bind-mounted directories)
 docker compose down
+docker compose down -v
 
 # Restart after changing .env
 docker compose up -d --force-recreate
@@ -110,5 +131,7 @@ docker compose pull cs2-server
 docker compose up -d
 ```
 
-Do not delete `./cs2-data` unless you intend to remove the server installation,
-downloaded workshop content, logs, and plugin configuration.
+This stack declares no Docker named volumes. Both `./cs2-data` and `./config`
+are host bind mounts, so `docker compose down -v` cannot delete them. Do not
+manually delete `./cs2-data` unless you intend to remove the server installation,
+downloaded workshop content, and logs.
