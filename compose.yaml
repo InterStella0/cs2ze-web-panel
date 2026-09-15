@@ -11,10 +11,15 @@ services:
       - |
         chown 1000:1000 /data
         chmod u+rwx /data
+        chown 1000:1000 /panel-data
+        chmod 700 /panel-data
     volumes:
       - type: bind
         source: ${CS2_DATA_PATH:-./cs2-data}
         target: /data
+      - type: bind
+        source: ${PANEL_DATA_PATH:-./panel-data}
+        target: /panel-data
     restart: "no"
 
   cs2-server:
@@ -44,5 +49,50 @@ services:
     ports:
       - "${CS2_PUBLISHED_PORT:-27015}:${CS2_PORT:-27015}/tcp"
       - "${CS2_PUBLISHED_PORT:-27015}:${CS2_PORT:-27015}/udp"
-      - "${CS2_RCON_PUBLISHED_PORT:-27050}:${CS2_RCON_PORT:-27050}/tcp"
+      - "127.0.0.1:${CS2_RCON_PUBLISHED_PORT:-27050}:${CS2_RCON_PORT:-27050}/tcp"
       - "${TV_PUBLISHED_PORT:-27020}:${TV_PORT:-27020}/udp"
+
+  cs2-panel:
+    build:
+      context: ./panel
+    container_name: ${CONTAINER_NAME:-cs2ze-server}-panel
+    user: "1000:1000"
+    group_add:
+      - "${DOCKER_GID:-983}"
+    depends_on:
+      prepare-data:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      PANEL_CONTAINER_NAME: ${CONTAINER_NAME:-cs2ze-server}-panel
+      CS2_CONTAINER_NAME: ${CONTAINER_NAME:-cs2ze-server}
+      CS2_SERVICE_NAME: cs2-server
+      PANEL_RCON_HOST: cs2-server
+      PANEL_RCON_PORT: ${CS2_RCON_PORT:-27050}
+      PANEL_DATA_DIR: /data
+      PANEL_CS2_DATA_DIR: /srv/cs2-data
+      PANEL_COOKIE_SECURE: ${PANEL_COOKIE_SECURE:-0}
+      PANEL_TRUST_PROXY: ${PANEL_TRUST_PROXY:-0}
+      PANEL_ADMIN_USER: ${PANEL_ADMIN_USER:-}
+      PANEL_ADMIN_PASSWORD: ${PANEL_ADMIN_PASSWORD:-}
+      CS2ZE_PROJECT_DIR: ${CS2ZE_PROJECT_DIR:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: ${CS2ZE_PROJECT_DIR:-${PWD}}
+        target: ${CS2ZE_PROJECT_DIR:-${PWD}}
+      - type: bind
+        source: ${CS2_DATA_PATH:-./cs2-data}
+        target: /srv/cs2-data
+        read_only: true
+      - type: bind
+        source: ${PANEL_DATA_PATH:-./panel-data}
+        target: /data
+    ports:
+      - "${PANEL_BIND_ADDR:-0.0.0.0}:${PANEL_PUBLISHED_PORT:-8090}:8090"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8090/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3

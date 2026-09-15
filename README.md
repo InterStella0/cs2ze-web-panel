@@ -131,6 +131,24 @@ docker compose pull cs2-server
 docker compose up -d
 ```
 
+### Deploying code updates to a running server
+
+`config/` and `.env` are **live server state**, not source code: the panel writes
+your map catalog, admin list and settings there. Syncing the repository to a
+server with a naive `rsync -a` will overwrite them and silently revert whatever
+the panel has saved. Always exclude them:
+
+```sh
+rsync -a --delete \
+  --exclude 'cs2-data/' --exclude 'panel-data/' \
+  --exclude 'config/'   --exclude '.env' \
+  --exclude '.git/' --exclude 'node_modules/' --exclude 'dist/' \
+  ./ user@host:/path/to/cs2ze-docker/
+```
+
+If the source and the copy in the game tree ever diverge, the panel's Maps and
+Admins pages flag it as out of sync and a save re-copies the source over it.
+
 This stack declares no Docker named volumes. Both `./cs2-data` and `./config`
 are host bind mounts, so `docker compose down -v` cannot delete them. Do not
 manually delete `./cs2-data` unless you intend to remove the server installation,

@@ -1,0 +1,15 @@
+{
+  "name": "cs2ze-panel",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "workspaces": ["shared", "server", "web"],
+  "scripts": {
+    "build": "npm run build -w @cs2ze/shared && npm run build -w @cs2ze/web && npm run build -w @cs2ze/server",
+    "dev:server": "npm run dev -w @cs2ze/server",
+    "dev:web": "npm run dev -w @cs2ze/web",
+    "typecheck": "npm run build -w @cs2ze/shared && npm run typecheck -w @cs2ze/server && npm run typecheck -w @cs2ze/web",
+    "test": "npm run build && npm run test -w @cs2ze/server"
+  },
+  "engines": { "node": ">=22" }
+}
