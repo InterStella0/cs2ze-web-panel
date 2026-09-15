@@ -116,7 +116,7 @@ function LoginPage(): ReactNode {
             <h1>CS2 ZE Panel</h1>
             <p className="login-target">
               {health.data?.project
-                ? <><code>{health.data.project}</code> · {health.data.workingDir}</>
+                ? <><code>{health.data.project}</code></>
                 : "Connecting to the Docker stack…"}
             </p>
           </div>
