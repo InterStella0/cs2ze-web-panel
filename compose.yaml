@@ -1,0 +1,45 @@
+name: ${COMPOSE_PROJECT_NAME:-cs2ze}
+
+services:
+  prepare-data:
+    image: alpine:3.22
+    container_name: ${CONTAINER_NAME:-cs2ze-server}-prepare
+    user: "0:0"
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        chown 1000:1000 /data
+        chmod u+rwx /data
+    volumes:
+      - type: bind
+        source: ${CS2_DATA_PATH:-./cs2-data}
+        target: /data
+    restart: "no"
+
+  cs2-server:
+    image: ${CS2_IMAGE:-joedwards32/cs2:latest}
+    container_name: ${CONTAINER_NAME:-cs2ze-server}
+    env_file:
+      - .env
+    depends_on:
+      prepare-data:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    stop_grace_period: ${STOP_GRACE_PERIOD:-30s}
+    stdin_open: true
+    tty: true
+    volumes:
+      - type: bind
+        source: ${CS2_DATA_PATH:-./cs2-data}
+        target: /home/steam/cs2-dedicated
+      - type: bind
+        source: ./scripts/install-mods.sh
+        target: /home/steam/cs2-dedicated/pre.sh
+        read_only: true
+    ports:
+      - "${CS2_PUBLISHED_PORT:-27015}:${CS2_PORT:-27015}/tcp"
+      - "${CS2_PUBLISHED_PORT:-27015}:${CS2_PORT:-27015}/udp"
+      - "${CS2_RCON_PUBLISHED_PORT:-27050}:${CS2_RCON_PORT:-27050}/tcp"
+      - "${TV_PUBLISHED_PORT:-27020}:${TV_PORT:-27020}/udp"
+
