@@ -42,6 +42,13 @@ export interface SetupError {
 
 export type ServerState = "running" | "exited" | "restarting" | "created" | "paused" | "removing" | "dead" | "absent";
 
+export interface ServerSetupProgress {
+  phase: "updating-steamcmd" | "downloading" | "configuring";
+  percentage: number | null;
+  downloadedBytes: number | null;
+  totalBytes: number | null;
+}
+
 export interface ServerStatus {
   state: ServerState;
   status: string;
@@ -67,6 +74,8 @@ export interface ServerStatus {
   } | null;
   plugins: PluginInfo[];
   diskUsageBytes: number | null;
+  /** Present while SteamCMD is preparing the game before RCON becomes available. */
+  setupProgress: ServerSetupProgress | null;
 }
 
 export interface Player {

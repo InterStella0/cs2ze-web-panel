@@ -361,6 +361,7 @@ function DashboardPage(): ReactNode {
           <Card className="metric"><div className="metric-icon"><Activity /></div><p>Container uptime</p><h2>{formatUptime(status.data?.uptimeSeconds)}</h2><span>{status.data?.startedAt ? `Started ${new Date(status.data.startedAt).toLocaleString()}` : "Not currently running"}</span></Card>
           <Card className="metric"><div className="metric-icon"><TerminalSquare /></div><p>Container image</p><h2 className="image-name">{status.data?.image || "—"}</h2><span>{status.data?.health ? `Health: ${status.data.health}` : "No container health status"}</span></Card>
         </section>
+        {status.data?.setupProgress && <SetupProgress progress={status.data.setupProgress} />}
         <GameSnapshot status={status.data} />
         <section className="content-grid">
           <Card className="panel-card lifecycle-card">
@@ -388,6 +389,35 @@ function DashboardPage(): ReactNode {
       />
     )}
   </>;
+}
+
+function formatBytes(bytes: number): string {
+  return bytes >= 1024 ** 3
+    ? `${(bytes / (1024 ** 3)).toFixed(1)} GiB`
+    : `${(bytes / (1024 ** 2)).toFixed(1)} MiB`;
+}
+
+function SetupProgress({ progress }: { progress: NonNullable<ServerStatus["setupProgress"]> }): ReactNode {
+  const downloading = progress.phase === "downloading";
+  const updatingSteamcmd = progress.phase === "updating-steamcmd";
+  const determinate = progress.percentage !== null;
+  const heading = updatingSteamcmd ? "Updating SteamCMD" : downloading ? "Downloading CS2 server files" : "Finishing server configuration";
+  const detail = progress.downloadedBytes !== null && progress.totalBytes !== null
+    ? `${formatBytes(progress.downloadedBytes)} of ${formatBytes(progress.totalBytes)} downloaded.${downloading ? " This large one-time download can take a while." : ""}`
+    : updatingSteamcmd
+      ? "Preparing the Steam downloader before the CS2 server files are installed."
+      : "The download is complete. SteamCMD is validating files and the game server will start automatically.";
+  return (
+    <Card className="setup-progress-card" role="status" aria-live="polite">
+      <div className="setup-progress-icon"><Download /></div>
+      <div className="setup-progress-copy">
+        <div><p className="eyebrow">First-time server setup</p><h2>{heading}</h2></div>
+        <strong>{progress.percentage !== null ? `${progress.percentage.toFixed(1)}%` : "Please wait…"}</strong>
+        <div className={`setup-progress-bar ${determinate ? "" : "indeterminate"}`} aria-hidden="true"><i style={determinate ? { width: `${progress.percentage}%` } : undefined} /></div>
+        <p className="muted">{detail}</p>
+      </div>
+    </Card>
+  );
 }
 
 function GameSnapshot({ status }: { status: ServerStatus | undefined }): ReactNode {

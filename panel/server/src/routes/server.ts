@@ -3,8 +3,9 @@ import type { Job, JobKind, ServerState, ServerStatus } from "@cs2ze/shared";
 import { requireAuth } from "../auth/routes.js";
 import { config } from "../config.js";
 import { ComposeBusyError } from "../docker/compose.js";
-import { dockerInspect } from "../docker/cli.js";
+import { docker, dockerInspect } from "../docker/cli.js";
 import { getJob, getJobs, onJobUpdate, startLifecycleJob } from "../docker/jobs.js";
+import { parseSetupProgress } from "../docker/setup-progress.js";
 import { getSetupError } from "../project.js";
 import { getRconStatus } from "../rcon/status.js";
 import { assertEnvCanBoot } from "./env.js";
@@ -51,6 +52,7 @@ async function serverStatus(): Promise<ServerStatus> {
       state: "absent", status: "Container has not been created", health: null,
       startedAt: null, uptimeSeconds: null, image: "", rcon: { connected: false, error: null },
       game: null, plugins: [], diskUsageBytes: null,
+      setupProgress: null,
     };
   }
   const state = normalizeState(inspect);
@@ -59,6 +61,18 @@ async function serverStatus(): Promise<ServerStatus> {
     ? Math.max(0, Math.floor((Date.now() - Date.parse(startedAt)) / 1000))
     : null;
   const live = state === "running" ? await getRconStatus() : null;
+  let setupProgress: ServerStatus["setupProgress"] = null;
+  if (state === "running" && !live?.connected) {
+    try {
+      const logs = await docker(["logs", "--timestamps", "--tail", "2000", config.cs2ContainerName], {
+        timeoutMs: 5_000,
+        maxBuffer: 4 * 1024 * 1024,
+      });
+      setupProgress = parseSetupProgress(`${logs.stdout}\n${logs.stderr}`);
+    } catch {
+      // Status remains useful when Docker cannot provide a log tail.
+    }
+  }
   return {
     state,
     status: inspect.State?.Status ?? state,
@@ -70,6 +84,7 @@ async function serverStatus(): Promise<ServerStatus> {
     game: live?.game ?? null,
     plugins: live?.plugins ?? [],
     diskUsageBytes: null,
+    setupProgress,
   };
 }
 
