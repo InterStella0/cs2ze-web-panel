@@ -53,6 +53,8 @@ export interface EnvKeySpec {
   cvar?: string;
   /** Quote the value when setting the cvar (needed for strings with spaces). */
   cvarQuote?: boolean;
+  /** Further cvars that take the same value when the key is applied live. */
+  extraCvars?: string[];
   /** No live equivalent: changing this needs `up -d --force-recreate`. */
   restartRequired?: boolean;
   /** Never returned in plaintext to the browser. */
@@ -101,7 +103,7 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "CS2_CHEATS", group: "server", label: "sv_cheats", type: "boolean01", default: "0", restartRequired: true, advanced: true },
   { key: "CS2_SERVER_HIBERNATE", group: "server", label: "Hibernate when empty", type: "boolean01", default: "0", restartRequired: true, advanced: true },
   { key: "CS2_SERVER_DELTATICKS_ENFORCE", group: "server", label: "Delta ticks enforce", type: "number", default: "2", restartRequired: true, advanced: true },
-  { key: "CS2_ADDITIONAL_ARGS", group: "server", label: "Additional srcds args", type: "string", default: "", restartRequired: true, advanced: true },
+  { key: "CS2_ADDITIONAL_ARGS", group: "server", label: "Additional srcds args", description: "Extra launch arguments consumed by the joedwards32/cs2 image.", type: "string", default: "", restartRequired: true, advanced: true },
   { key: "CS2_CFG_URL", group: "server", label: "Remote cfg URL", type: "string", default: "", restartRequired: true, slashEscaped: true, advanced: true },
   { key: "CS2_GAMEALIAS", group: "server", label: "Game alias", type: "string", default: "casual", restartRequired: true, advanced: true },
   { key: "CS2_GAMETYPE", group: "server", label: "Game type", type: "number", default: "0", restartRequired: true, advanced: true },
@@ -109,7 +111,7 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "CS2_MAPGROUP", group: "server", label: "Map group", type: "string", default: "mg_active", restartRequired: true, advanced: true },
   { key: "CS2_STARTMAP", group: "server", label: "Fallback start map", type: "string", default: "de_dust2", restartRequired: true },
   { key: "CS2_HOST_WORKSHOP_MAP", group: "server", label: "Start workshop map", description: "Workshop ID the server boots into.", type: "string", default: "3144617784", restartRequired: true },
-  { key: "CS2_HOST_WORKSHOP_COLLECTION", group: "server", label: "Workshop collection", description: "Collection to download on start.", type: "string", default: "", restartRequired: true },
+  { key: "CS2_HOST_WORKSHOP_COLLECTION", group: "server", label: "Workshop bootstrap collection", description: "Must be non-empty so CS2Fixes can intercept host_workshop_collection and replace it with maplist.jsonc. Use a collection with fewer than 100 maps; this default is the one-map bootstrap collection recommended by the CS2Fixes developer.", type: "string", default: "3222748625", restartRequired: true },
   { key: "DEBUG", group: "server", label: "Debug output", type: "boolean01", default: "0", restartRequired: true, advanced: true },
   { key: "STEAMAPPVALIDATE", group: "server", label: "Validate on update", type: "boolean01", default: "0", restartRequired: true, advanced: true },
 
@@ -123,6 +125,7 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "ZE_ROUND_TIME", group: "gameplay", label: "Round time (min)", type: "number", default: "60", min: 1, max: 600, cvar: "mp_roundtime" },
   { key: "ZE_FREEZE_TIME", group: "gameplay", label: "Freeze time (s)", type: "number", default: "5", min: 0, max: 120, cvar: "mp_freezetime" },
   { key: "ZE_BUY_TIME", group: "gameplay", label: "Buy time (s)", type: "number", default: "60", min: 0, max: 600, cvar: "mp_buytime" },
+  { key: "ZE_ROUND_MONEY", group: "gameplay", label: "Round start money", description: "Money every player gets at the start of each round. Sets mp_afterroundmoney, mp_maxmoney and mp_startmoney together.", type: "number", default: "16000", min: 0, max: 65535, cvar: "mp_afterroundmoney", extraCvars: ["mp_maxmoney", "mp_startmoney"] },
 
   // ---- ZombieReborn --------------------------------------------------------
   b("ZR_ENABLE", "zombiereborn", "Enable ZombieReborn", "zr_enable", "1"),
@@ -218,7 +221,7 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "MODS_FORCE_REINSTALL", group: "mods", label: "Force re-download on next start", description: "Set to 1 for one start to download all enabled mod archives again, then set it back to 0.", type: "boolean01", default: "0", restartRequired: true },
 
   // ---- MultiAddonManager ---------------------------------------------------
-  { key: "MAM_EXTRA_ADDONS", group: "addons", label: "Extra addons (server + client)", description: "Comma-separated workshop IDs.", type: "string", default: "", cvar: "mm_extra_addons", cvarQuote: true },
+  { key: "MAM_EXTRA_ADDONS", group: "addons", label: "Extra addons (server + client)", description: "Comma-separated workshop IDs. Content packs such as GFL Zombie Escape Content (3160448201) belong here, not in the start workshop map.", type: "string", default: "3160448201", cvar: "mm_extra_addons", cvarQuote: true },
   { key: "MAM_CLIENT_EXTRA_ADDONS", group: "addons", label: "Client-only extra addons", type: "string", default: "", cvar: "mm_client_extra_addons", cvarQuote: true },
   { key: "MAM_EXTRA_ADDONS_TIMEOUT", group: "addons", label: "Extra addons timeout (s)", type: "number", default: "10", min: 0, cvar: "mm_extra_addons_timeout" },
   { key: "MAM_ADDON_CONNECTION_TIMEOUT", group: "addons", label: "Addon connection timeout (s)", type: "number", default: "30", min: 0, cvar: "mm_addon_connection_timeout" },

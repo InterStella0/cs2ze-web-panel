@@ -96,7 +96,7 @@ test("Step 3/4/5 routes enforce auth and safely manage runtime plus catalog data
   await Promise.all([projectDir, dataDir, binDir, logDir, configDir, liveConfigDir].map((directory) => fs.mkdir(directory, { recursive: true })));
   const composeFile = path.join(projectDir, "compose.yaml");
   await fs.writeFile(composeFile, "services: {}\n");
-  await fs.writeFile(path.join(projectDir, ".env"), "# preserved comment\nCS2_RCONPW=secret\nZE_ROUND_TIME=60\nCS2_MAXPLAYERS=32\nMETAMOD_VERSION=2.0.0-git1411\nCS2FIXES_VERSION=v1.20.1\n");
+  await fs.writeFile(path.join(projectDir, ".env"), "# preserved comment\nCS2_RCONPW=secret\nZE_ROUND_TIME=60\nZE_ROUND_MONEY=16000\nCS2_MAXPLAYERS=32\nCS2_HOST_WORKSHOP_COLLECTION=3222748625\nMETAMOD_VERSION=2.0.0-git1411\nCS2FIXES_VERSION=v1.20.1\n");
   await fs.writeFile(path.join(logDir, "L-test.log"), "\x1b[32mgame ready\x1b[0m\r\n");
   const initialMaps = '{"Groups":{},"Maps":{"ze_integration":{"enabled":true,"workshop_id":123}}}\n';
   const initialAdmins = '{"Groups":{},"Admins":{"0":{"name":"Unconfigured placeholder","flags":"","immunity":0}}}\n';
@@ -255,18 +255,22 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   })).status, 403);
   const saved = await fetch(`${baseUrl}/api/env`, {
     method: "PATCH", headers: { "content-type": "application/json", cookie, "x-cs2ze-csrf": auth.csrfToken },
-    body: JSON.stringify({ changes: { ZE_ROUND_TIME: "45", CS2_MAXPLAYERS: "40" }, applyLive: true }),
+    body: JSON.stringify({ changes: { ZE_ROUND_TIME: "45", ZE_ROUND_MONEY: "15000", CS2_MAXPLAYERS: "40" }, applyLive: true }),
   });
   assert.equal(saved.status, 200);
   const savedResult = await saved.json();
-  assert.deepEqual(savedResult.written.sort(), ["CS2_MAXPLAYERS", "ZE_ROUND_TIME"]);
+  assert.deepEqual(savedResult.written.sort(), ["CS2_MAXPLAYERS", "ZE_ROUND_MONEY", "ZE_ROUND_TIME"]);
   assert.equal(savedResult.appliedLive[0].key, "ZE_ROUND_TIME");
   assert.equal(savedResult.appliedLive[0].ok, true);
   assert.deepEqual(savedResult.pendingRestart, ["CS2_MAXPLAYERS"]);
   assert.ok(rcon.commands.includes("mp_roundtime 45"));
+  assert.ok(rcon.commands.includes("mp_afterroundmoney 15000"));
+  assert.ok(rcon.commands.includes("mp_maxmoney 15000"));
+  assert.ok(rcon.commands.includes("mp_startmoney 15000"));
   const writtenEnv = await fs.readFile(path.join(projectDir, ".env"), "utf8");
   assert.match(writtenEnv, /^# preserved comment/m);
   assert.match(writtenEnv, /^ZE_ROUND_TIME=45$/m);
+  assert.match(writtenEnv, /^ZE_ROUND_MONEY=15000$/m);
   assert.match(writtenEnv, /^CS2_MAXPLAYERS=40$/m);
   assert.ok((await fs.readdir(path.join(dataDir, "backups", ".env"))).length >= 1);
 

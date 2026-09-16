@@ -6,6 +6,12 @@
       "display_name": "Winter Warehouse",
       "workshop_id": 3144617784,
       "cooldown": 0
+    },
+    "ze_random_p": {
+      "enabled": true,
+      "display_name": "Random",
+      "workshop_id": 3134108142,
+      "cooldown": 0
     }
   }
 }

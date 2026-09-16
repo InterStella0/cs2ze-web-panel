@@ -29,8 +29,11 @@ docker compose up -d
 
 The checked-in defaults start `ze_winter_warehouse_p` (Workshop ID
 `3144617784`) with ZombieReborn, weapons, knockback, flashlights, nominations,
-RTV/map voting, and one-player infection testing enabled. For a public Internet
-server, edit `.env` first to set `SRCDS_TOKEN` and replace `CS2_RCONPW`.
+RTV/map voting, and one-player infection testing enabled. They also mount GFL
+Zombie Escape Content (Workshop ID `3160448201`) through MultiAddonManager.
+The nomination catalog includes `ze_random_p` (`3134108142`) as an alternate.
+For a public Internet server, edit `.env` first to set `SRCDS_TOKEN` and replace
+`CS2_RCONPW`.
 
 The initial Steam download is large and can take a while. Follow it with:
 
@@ -63,9 +66,16 @@ configuration replacement logic.
 
 Useful entries:
 
-- `CS2_HOST_WORKSHOP_MAP`: workshop ID to start directly.
-- `CS2_HOST_WORKSHOP_COLLECTION`: collection to download.
-- `MAM_EXTRA_ADDONS`: comma-separated server/client workshop addon IDs.
+- `CS2_HOST_WORKSHOP_MAP`: workshop map ID to start directly. The default is
+  `ze_winter_warehouse_p` (`3144617784`).
+- `CS2_HOST_WORKSHOP_COLLECTION`: bootstrap collection passed to
+  `host_workshop_collection` on startup. CS2Fixes intercepts this command and
+  replaces the collection with `maplist.jsonc`; do not leave it blank while map
+  voting is enabled. Keep bootstrap collections below 100 maps.
+- `MAM_EXTRA_ADDONS`: comma-separated server/client workshop content addon IDs.
+  `3160448201` is a content pack, not a playable map ID, so it belongs here.
+- `CS2_ADDITIONAL_ARGS`: arguments passed to the CS2 process by the base image.
+  (`STARTUP_ARGS` is not consumed by `joedwards32/cs2`.)
 - `MAM_CLIENT_EXTRA_ADDONS`: comma-separated client-only addon IDs.
 - `CS2FIXES_EXTRA_CFG`: semicolon-separated extra CS2Fixes/ZR cvar lines.
 - `MODS_FORCE_REINSTALL=1`: download all enabled mod archives again on the next
@@ -97,6 +107,11 @@ configuration cannot drift between rebuilds.
 
 Player chat commands include `!guns`, `!zclass`, `!flashlight` (or the flashlight
 key), `!nominate`, and `!rtv`. `!nom` is not a CS2Fixes command.
+
+The Maps page validates `maplist.jsonc` before writing it. After a manual edit,
+watch `docker compose logs cs2-server` for `Failed parsing JSON` and use the
+Maps page's reload action (equivalent to the root-admin `!reload_map_list`
+command) to force CS2Fixes to parse and download the configured catalog again.
 
 ## Version compatibility
 

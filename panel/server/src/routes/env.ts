@@ -148,7 +148,9 @@ export async function registerEnvRoutes(app: FastifyInstance): Promise<void> {
         if (!spec?.cvar) continue;
         const rendered = spec.cvarQuote ? quoteCvar(value) : value;
         try {
-          await rcon.exec(`${spec.cvar} ${rendered}`, 10_000);
+          for (const cvar of [spec.cvar, ...(spec.extraCvars ?? [])]) {
+            await rcon.exec(`${cvar} ${rendered}`, 10_000);
+          }
           appliedLive.push({ key, cvar: spec.cvar, ok: true });
           liveSucceeded.add(key);
         } catch (error) {

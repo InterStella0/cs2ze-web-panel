@@ -11,6 +11,7 @@ const valid = {
   CS2FIXES_VERSION: "v1.20.1",
   MULTIADDONMANAGER_VERSION: "v1.5.4",
   STRIPPERCS2_VERSION: "v1.1.3",
+  CS2_HOST_WORKSHOP_COLLECTION: "3222748625",
   CS2_PUBLISHED_PORT: "27015",
   CS2_RCON_PUBLISHED_PORT: "27050",
   TV_PUBLISHED_PORT: "27020",
@@ -36,4 +37,9 @@ test("shared env validation rejects boot blockers, unsafe values, ranges, and po
 test("shared env validation refuses unknown and panel-managed keys", () => {
   assert.match(validateEnvPatch(valid, { UNKNOWN_KEY: "value" })[0].message, /Unknown/);
   assert.match(validateEnvPatch(valid, { CS2_ADMIN_STEAMID: "76561198000000000" })[0].message, /managed/);
+});
+
+test("shared env validation warns when CS2Fixes voting has no startup collection hook", () => {
+  const findings = validateEnvRecord({ ...valid, CS2_HOST_WORKSHOP_COLLECTION: "" });
+  assert.ok(findings.some((finding) => finding.severity === "warning" && /map voting needs a workshop collection/.test(finding.message)));
 });

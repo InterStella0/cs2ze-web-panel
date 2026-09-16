@@ -13,6 +13,10 @@ function error(message: string, keys: string[]): CompatFinding {
   return { severity: "error", message, keys };
 }
 
+function warning(message: string, keys: string[]): CompatFinding {
+  return { severity: "warning", message, keys };
+}
+
 function validateTypedValue(spec: EnvKeySpec, value: string): string | null {
   const safe = envValue.safeParse(value);
   if (!safe.success) return safe.error.issues[0]?.message ?? "Invalid value";
@@ -72,6 +76,15 @@ export function validateEnvRecord(env: Record<string, string>): CompatFinding[] 
   }
   for (const [port, keys] of ports) {
     if (keys.length > 1) findings.push(error(`Published port ${port} is assigned more than once`, keys));
+  }
+
+  if ((env.INSTALL_CS2FIXES ?? "1") === "1"
+    && (env.CS2FIXES_VOTEMANAGER_ENABLE ?? "1") === "1"
+    && !env.CS2_HOST_WORKSHOP_COLLECTION) {
+    findings.push(warning(
+      "CS2Fixes map voting needs a workshop collection at server startup so it can replace it with maplist.jsonc",
+      ["CS2_HOST_WORKSHOP_COLLECTION", "CS2FIXES_VOTEMANAGER_ENABLE"],
+    ));
   }
 
   findings.push(...checkBootBlocking(env));

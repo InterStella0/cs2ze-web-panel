@@ -211,6 +211,7 @@
 
   configure_cs2fixes_server() {
     local server_config="$csgo_dir/cfg/cs2fixes/server.cfg"
+    local money="${ZE_ROUND_MONEY:-16000}"
 
     mkdir -p "$(dirname "$server_config")"
     {
@@ -221,7 +222,15 @@
       printf 'mp_roundtime_hostage 0\n'
       printf 'mp_freezetime %s\n' "${ZE_FREEZE_TIME:-5}"
       printf 'mp_buytime %s\n' "${ZE_BUY_TIME:-60}"
+      printf 'mp_maxmoney %s\n' "$money"
+      printf 'mp_startmoney %s\n' "$money"
+      printf 'mp_afterroundmoney %s\n' "$money"
       printf 'mp_do_warmup_period 0\n'
+      printf 'mp_warmuptime 0\n'
+      printf 'mp_warmuptime_all_players_connected 0\n'
+      printf 'mp_warmup_pausetimer 0\n'
+      printf 'mp_warmup_offline_enabled 0\n'
+      printf 'mp_warmup_online_enabled 0\n'
       printf 'mp_warmup_end\n'
       printf 'mp_limitteams 0\n'
       printf 'mp_autoteambalance 0\n'
@@ -237,6 +246,40 @@
       printf 'bot_quota 0\n'
       printf 'bot_quota_mode fill\n'
     } > "$server_config"
+  }
+
+  # The gamemode_*.cfg files are executed by the engine on every map load,
+  # after cfg/cs2fixes/server.cfg, and they re-assert Valve's warmup and money
+  # defaults. Patch them in place, the same way the base image patches
+  # bot_quota, so the ZE rules survive a level change.
+  set_gamemode_cvar() {
+    local cvar="$1"
+    local value="$2"
+    local file
+
+    for file in "$csgo_dir"/cfg/gamemode_*.cfg; do
+      [ -e "$file" ] || continue
+      if grep -qE "^[[:space:]]*${cvar}([[:space:]]|\$)" "$file"; then
+        sed -ri "s|^[[:space:]]*${cvar}([[:space:]].*)?\$|${cvar} ${value}|" "$file"
+      else
+        printf '%s %s\n' "$cvar" "$value" >> "$file"
+      fi
+    done
+  }
+
+  configure_gamemode_rules() {
+    local money="${ZE_ROUND_MONEY:-16000}"
+
+    set_gamemode_cvar mp_do_warmup_period 0
+    set_gamemode_cvar mp_warmuptime 0
+    set_gamemode_cvar mp_warmuptime_all_players_connected 0
+    set_gamemode_cvar mp_warmup_pausetimer 0
+    set_gamemode_cvar mp_warmup_offline_enabled 0
+    set_gamemode_cvar mp_warmup_online_enabled 0
+    set_gamemode_cvar mp_maxmoney "$money"
+    set_gamemode_cvar mp_startmoney "$money"
+    set_gamemode_cvar mp_afterroundmoney "$money"
+    log "disabled warmup and set round money to $money in the gamemode configs"
   }
 
   configure_admin() {
@@ -412,6 +455,8 @@
       "addons/StripperCS2/maps"
   fi
   set_plugin_state "$csgo_dir/addons/metamod/StripperCS2.vdf" "${INSTALL_STRIPPERCS2:-1}"
+
+  configure_gamemode_rules
 
   log "mod installation complete"
 ) || {
