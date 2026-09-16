@@ -1,6 +1,6 @@
 # CS2 Zombie Escape Web Panel
 
-[panel](assets/ze-panel-preview.png)
+![panel](assets/ze-panel-preview.png)
 
 A self-hosted web panel and Docker stack for running a Counter-Strike 2 Zombie
 Escape server.
