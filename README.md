@@ -1,4 +1,4 @@
-# CS2 Zombie Escape Docker
+# CS2 Zombie Escape Web Panel
 
 One Compose stack for:
 
