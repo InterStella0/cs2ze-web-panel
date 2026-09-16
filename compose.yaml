@@ -9,10 +9,12 @@ services:
       - /bin/sh
       - -ec
       - |
+        /bin/sh /init-config.sh /defaults /server-config
         chown 1000:1000 /data
         chmod u+rwx /data
         chown 1000:1000 /panel-data
         chmod 700 /panel-data
+        chown -R 1000:1000 /server-config
     volumes:
       - type: bind
         source: ${CS2_DATA_PATH:-./cs2-data}
@@ -20,6 +22,17 @@ services:
       - type: bind
         source: ${PANEL_DATA_PATH:-./panel-data}
         target: /panel-data
+      - type: bind
+        source: ./config
+        target: /defaults
+        read_only: true
+      - type: bind
+        source: ./server-config
+        target: /server-config
+      - type: bind
+        source: ./scripts/init-config.sh
+        target: /init-config.sh
+        read_only: true
     restart: "no"
 
   cs2-server:
@@ -43,7 +56,7 @@ services:
         target: /home/steam/cs2-dedicated/pre.sh
         read_only: true
       - type: bind
-        source: ./config
+        source: ./server-config
         target: /opt/cs2ze-config
         read_only: true
     ports:

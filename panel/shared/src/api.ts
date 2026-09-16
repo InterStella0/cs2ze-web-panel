@@ -194,7 +194,7 @@ export interface EnvRevealResponse {
 export interface DriftResponse {
   /** .env keys that differ from the running container's baked-in env. */
   envDrift: Array<{ key: string; running: string | null; current: string | null; isSecret: boolean; restartRequired: boolean }>;
-  /** config/ files modified since the container started. */
+  /** server-config/ files modified since the container started. */
   configDrift: Array<{ path: string; modifiedAt: string; liveMatches: boolean; hotReloadable: boolean }>;
   containerStartedAt: string | null;
   needsRestart: boolean;
@@ -291,7 +291,7 @@ export interface AuditEntry {
 }
 
 export interface ConfigFileInfo {
-  /** Path relative to the project directory, e.g. config/cs2fixes/maplist.jsonc. */
+  /** Path relative to the project directory, e.g. server-config/cs2fixes/maplist.jsonc. */
   path: string;
   label: string;
   kind: "jsonc" | "cfg";

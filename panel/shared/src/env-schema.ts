@@ -103,7 +103,7 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "CS2_CHEATS", group: "server", label: "sv_cheats", type: "boolean01", default: "0", restartRequired: true, advanced: true },
   { key: "CS2_SERVER_HIBERNATE", group: "server", label: "Hibernate when empty", type: "boolean01", default: "0", restartRequired: true, advanced: true },
   { key: "CS2_SERVER_DELTATICKS_ENFORCE", group: "server", label: "Delta ticks enforce", type: "number", default: "2", restartRequired: true, advanced: true },
-  { key: "CS2_ADDITIONAL_ARGS", group: "server", label: "Additional srcds args", description: "Extra launch arguments consumed by the joedwards32/cs2 image.", type: "string", default: "", restartRequired: true, advanced: true },
+  { key: "CS2_ADDITIONAL_ARGS", group: "server", label: "Additional srcds args", description: "Extra launch arguments consumed by the joedwards32/cs2 image. Workshop command filtering is disabled by default so CS2Fixes can intercept the startup collection command.", type: "string", default: "-disable_workshop_command_filtering", restartRequired: true, advanced: true },
   { key: "CS2_CFG_URL", group: "server", label: "Remote cfg URL", type: "string", default: "", restartRequired: true, slashEscaped: true, advanced: true },
   { key: "CS2_GAMEALIAS", group: "server", label: "Game alias", type: "string", default: "casual", restartRequired: true, advanced: true },
   { key: "CS2_GAMETYPE", group: "server", label: "Game type", type: "number", default: "0", restartRequired: true, advanced: true },

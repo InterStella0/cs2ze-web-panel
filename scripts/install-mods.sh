@@ -225,10 +225,6 @@
       printf 'mp_maxmoney %s\n' "$money"
       printf 'mp_startmoney %s\n' "$money"
       printf 'mp_afterroundmoney %s\n' "$money"
-      printf 'mp_do_warmup_period 0\n'
-      printf 'mp_warmuptime 0\n'
-      printf 'mp_warmuptime_all_players_connected 0\n'
-      printf 'mp_warmup_pausetimer 0\n'
       printf 'mp_warmup_offline_enabled 0\n'
       printf 'mp_warmup_online_enabled 0\n'
       printf 'mp_warmup_end\n'
@@ -252,6 +248,15 @@
   # after cfg/cs2fixes/server.cfg, and they re-assert Valve's warmup and money
   # defaults. Patch them in place, the same way the base image patches
   # bot_quota, so the ZE rules survive a level change.
+  ensure_trailing_newline() {
+    local file="$1"
+
+    [ -s "$file" ] || return
+    if [ -n "$(tail -c 1 "$file")" ]; then
+      printf '\n' >> "$file"
+    fi
+  }
+
   set_gamemode_cvar() {
     local cvar="$1"
     local value="$2"
@@ -262,20 +267,52 @@
       if grep -qE "^[[:space:]]*${cvar}([[:space:]]|\$)" "$file"; then
         sed -ri "s|^[[:space:]]*${cvar}([[:space:]].*)?\$|${cvar} ${value}|" "$file"
       else
+        ensure_trailing_newline "$file"
         printf '%s %s\n' "$cvar" "$value" >> "$file"
       fi
+    done
+  }
+
+  remove_gamemode_setting() {
+    local setting="$1"
+    local file
+
+    for file in "$csgo_dir"/cfg/gamemode_*.cfg; do
+      [ -e "$file" ] || continue
+      sed -ri \
+        -e "/^[[:space:]]*${setting}([[:space:]]|\$)/d" \
+        -e "s/${setting}[[:space:]]+[^[:space:]]+[[:space:]]*\$//" \
+        "$file"
+    done
+  }
+
+  append_gamemode_command() {
+    local command="$1"
+    local file
+
+    for file in "$csgo_dir"/cfg/gamemode_*.cfg; do
+      [ -e "$file" ] || continue
+      # Put the command after all Valve settings so a later line cannot restart
+      # warmup. Removing it first also avoids accumulating copies on each boot.
+      sed -ri "/^[[:space:]]*${command}([[:space:]]|\$)/d" "$file"
+      ensure_trailing_newline "$file"
+      printf '%s\n' "$command" >> "$file"
     done
   }
 
   configure_gamemode_rules() {
     local money="${ZE_ROUND_MONEY:-16000}"
 
-    set_gamemode_cvar mp_do_warmup_period 0
-    set_gamemode_cvar mp_warmuptime 0
-    set_gamemode_cvar mp_warmuptime_all_players_connected 0
-    set_gamemode_cvar mp_warmup_pausetimer 0
+    # mp_do_warmup_period does not exist in CS2, and mp_warmuptime has a
+    # minimum of 5; changing the latter also resets warmup. Remove the legacy
+    # lines previously written by this installer instead of trying to set them.
+    remove_gamemode_setting mp_do_warmup_period
+    remove_gamemode_setting mp_warmuptime
+    remove_gamemode_setting mp_warmuptime_all_players_connected
+    remove_gamemode_setting mp_warmup_pausetimer
     set_gamemode_cvar mp_warmup_offline_enabled 0
     set_gamemode_cvar mp_warmup_online_enabled 0
+    append_gamemode_command mp_warmup_end
     set_gamemode_cvar mp_maxmoney "$money"
     set_gamemode_cvar mp_startmoney "$money"
     set_gamemode_cvar mp_afterroundmoney "$money"

@@ -13,10 +13,10 @@ interface ContainerInspect {
 }
 
 const HOT_RELOADABLE = new Set([
-  "config/cs2fixes/maplist.jsonc",
-  "config/cs2fixes/admins.jsonc",
-  "config/cs2fixes/cvar_whitelist.jsonc",
-  "config/cs2fixes/discordbots.jsonc",
+  "server-config/cs2fixes/maplist.jsonc",
+  "server-config/cs2fixes/admins.jsonc",
+  "server-config/cs2fixes/cvar_whitelist.jsonc",
+  "server-config/cs2fixes/discordbots.jsonc",
 ]);
 
 function parseContainerEnv(lines: string[] | undefined): Record<string, string> {
@@ -50,14 +50,14 @@ async function walkFiles(directory: string, prefix: string): Promise<string[]> {
 }
 
 function livePathFor(relative: string): string | null {
-  if (relative.startsWith("config/cs2fixes/maps/")) {
-    return path.join(config.cs2DataDir, "game/csgo/cfg/cs2fixes/maps", relative.slice("config/cs2fixes/maps/".length));
+  if (relative.startsWith("server-config/cs2fixes/maps/")) {
+    return path.join(config.cs2DataDir, "game/csgo/cfg/cs2fixes/maps", relative.slice("server-config/cs2fixes/maps/".length));
   }
-  if (relative.startsWith("config/cs2fixes/")) {
-    return path.join(config.cs2DataDir, "game/csgo/addons/cs2fixes/configs", relative.slice("config/cs2fixes/".length));
+  if (relative.startsWith("server-config/cs2fixes/")) {
+    return path.join(config.cs2DataDir, "game/csgo/addons/cs2fixes/configs", relative.slice("server-config/cs2fixes/".length));
   }
-  if (relative.startsWith("config/stripper/")) {
-    return path.join(config.cs2DataDir, "game/csgo/addons/StripperCS2/maps", relative.slice("config/stripper/".length));
+  if (relative.startsWith("server-config/stripper/")) {
+    return path.join(config.cs2DataDir, "game/csgo/addons/StripperCS2/maps", relative.slice("server-config/stripper/".length));
   }
   return null;
 }
@@ -101,8 +101,8 @@ export async function getDrift(): Promise<DriftResponse> {
   const containerStartedAt = validStartedAt(inspect?.State?.StartedAt);
   const startedMs = containerStartedAt ? Date.parse(containerStartedAt) : 0;
   const { workingDir } = getProject();
-  const configRoot = path.join(workingDir, "config");
-  const relativeFiles = await walkFiles(configRoot, "config");
+  const configRoot = path.join(workingDir, "server-config");
+  const relativeFiles = await walkFiles(configRoot, "server-config");
   const configDrift: DriftResponse["configDrift"] = [];
   for (const relative of relativeFiles) {
     const absolute = path.join(workingDir, relative);

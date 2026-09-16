@@ -14,7 +14,7 @@ import { backupFile } from "./backups.js";
  */
 
 /** Files the panel is allowed to write, relative to the project directory. */
-const WRITABLE_PREFIXES = ["config/"];
+const WRITABLE_PREFIXES = ["server-config/"];
 const WRITABLE_EXACT = [".env"];
 
 export class ForbiddenPathError extends Error {
@@ -42,7 +42,7 @@ export async function resolveWritable(relPath: string): Promise<{ abs: string; r
     throw new ForbiddenPathError(relPath);
   }
 
-  // Follow symlinks on the parent directory: a link inside config/ must not be
+  // Follow symlinks on the parent directory: a link inside server-config/ must not be
   // usable to write outside the project.
   const parent = path.dirname(abs);
   try {

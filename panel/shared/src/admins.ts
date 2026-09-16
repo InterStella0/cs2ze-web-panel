@@ -2,7 +2,7 @@ import { z } from "zod";
 import { adminFlags, configGroupName, steamId64 } from "./validators.js";
 
 /**
- * Schema for config/cs2fixes/admins.jsonc.
+ * Schema for server-config/cs2fixes/admins.jsonc.
  * Field set taken from addons/cs2fixes/configs/admins.jsonc.example.
  */
 

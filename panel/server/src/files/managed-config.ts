@@ -7,12 +7,12 @@ import { readLiveFile, readProjectFile, safeWrite } from "./safe-write.js";
 
 export const MANAGED_CONFIGS = {
   maps: {
-    source: "config/cs2fixes/maplist.jsonc",
+    source: "server-config/cs2fixes/maplist.jsonc",
     liveRel: "game/csgo/addons/cs2fixes/configs/maplist.jsonc",
     containerPath: "/home/steam/cs2-dedicated/game/csgo/addons/cs2fixes/configs/maplist.jsonc",
   },
   admins: {
-    source: "config/cs2fixes/admins.jsonc",
+    source: "server-config/cs2fixes/admins.jsonc",
     liveRel: "game/csgo/addons/cs2fixes/configs/admins.jsonc",
     containerPath: "/home/steam/cs2-dedicated/game/csgo/addons/cs2fixes/configs/admins.jsonc",
   },

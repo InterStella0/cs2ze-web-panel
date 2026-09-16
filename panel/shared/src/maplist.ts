@@ -2,7 +2,7 @@ import { z } from "zod";
 import { configGroupName, mapName, workshopId, workshopIdLike } from "./validators.js";
 
 /**
- * Schema for config/cs2fixes/maplist.jsonc.
+ * Schema for server-config/cs2fixes/maplist.jsonc.
  * Field set taken from addons/cs2fixes/configs/maplist.jsonc.example.
  */
 
@@ -55,6 +55,6 @@ export interface MapsResponse {
   groups: Record<string, MapGroup>;
   currentMap: string | null;
   nextMap: string | null;
-  /** True when config/ and the live game-tree copy differ. */
+  /** True when server-config/ and the live game-tree copy differ. */
   liveOutOfSync: boolean;
 }

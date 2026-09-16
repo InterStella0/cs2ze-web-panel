@@ -133,7 +133,7 @@ export async function runPreflight(): Promise<ProjectInfo | null> {
       code: "project_dir_not_writable",
       message: "The project directory is not writable",
       detail:
-        `${workingDir} must be writable by the panel (uid 1000) so it can update .env and config/. ` +
+        `${workingDir} must be writable by the panel (uid 1000) so it can update .env and server-config/. ` +
         "Check the mount is not read_only and that the directory is owned by 1000:1000.",
       expected: `${workingDir} writable by uid 1000`,
     };

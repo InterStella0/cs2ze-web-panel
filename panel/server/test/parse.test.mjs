@@ -42,6 +42,26 @@ loaded spawngroup(  3)  : SV:  [3: prefabs/misc/terrorist_team_intro | main lump
   id     time ping loss      state   rate adr name
 #end`;
 
+// Current player-row format captured from CS2 1.41.8.1. Steam IDs are omitted
+// from `status` and supplied separately by CS2Fixes' `c_who` table.
+const currentStatusWithPlayers = `hostname : Current Format Server
+version  : 1.41.8.1/14181 10896 secure public
+udp/ip   : 0.0.0.0:27015 (public 203.0.113.10:27015)
+players  : 2 humans, 0 bots (0 max) (not hibernating) (unreserved)
+---------players--------
+  id     time ping loss      state   rate adr name
+   0    07:20  179    0     active 786432 192.0.2.10:29415 'Player One'
+   1    04:25  164    0     active 786432 192.0.2.11:64031 'Player Two'
+#end`;
+
+const currentWhoTable = `c_who output: 2 clients
+|----------------------|----------------------------------------------------|-------------------|
+|         Name         |                       Flags                        |    Steam64 ID     |
+|----------------------|----------------------------------------------------|-------------------|
+|      Player Two      |                         -                          | 76561198142120845 |
+|      Player One      |                         b                          | 76561199018771835 |
+|----------------------|----------------------------------------------------|-------------------|`;
+
 test("sanitizers remove ANSI/chat colors but preserve multiline formatting", () => {
   const input = "\x07pink\tfield\r\n\x1b[31mred\x1b[0m\rnext";
   assert.equal(sanitizeRcon(input), "pink\tfield\nred\nnext");
@@ -77,6 +97,27 @@ test("parseStatus reads the map from spawngroups when CS2 omits a map line", () 
   assert.equal(parsed.game.publicAddress, "94.130.242.62:27015");
   assert.equal(parsed.game.players, 0);
   assert.deepEqual(parsed.players, []);
+});
+
+test("parseStatus reads current CS2 player rows and merges the c_who table by name", () => {
+  const parsed = parseStatus(currentStatusWithPlayers);
+  assert.equal(parsed.game.players, 2);
+  assert.equal(parsed.players.length, 2);
+  assert.deepEqual(parsed.players[0], {
+    userid: "0", name: "Player One", steamid: null, ping: 179, loss: 0,
+    state: "active", time: "07:20", address: "192.0.2.10:29415", isBot: false, isAdmin: false,
+  });
+
+  assert.deepEqual(parseWho(currentWhoTable), [
+    { userid: null, name: "Player Two", steamid: "76561198142120845", isAdmin: false },
+    { userid: null, name: "Player One", steamid: "76561199018771835", isAdmin: true },
+  ]);
+  const merged = mergeWhoPlayers(parsed.players, currentWhoTable);
+  assert.equal(merged.length, 2);
+  assert.equal(merged[0].steamid, "76561199018771835");
+  assert.equal(merged[0].isAdmin, true);
+  assert.equal(merged[1].steamid, "76561198142120845");
+  assert.equal(merged[1].isAdmin, false);
 });
 
 test("parseTimeleft understands the worded CS2Fixes c_timeleft reply", () => {

@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { StrictMode, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import {
   createRootRoute,
@@ -52,7 +52,34 @@ import {
 } from "@cs2ze/shared";
 import { api, ApiError } from "./api.js";
 import { AdminsContent, MapsContent, PlayersContent } from "./management.js";
+import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert.js";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./components/ui/alert-dialog.js";
+import { Badge } from "./components/ui/badge.js";
+import { Button } from "./components/ui/button.js";
+import { Card } from "./components/ui/card.js";
+import { Checkbox } from "./components/ui/checkbox.js";
+import { Input } from "./components/ui/input.js";
+import { Label } from "./components/ui/label.js";
+import { NativeSelect } from "./components/ui/native-select.js";
+import { Switch } from "./components/ui/switch.js";
+import { Tabs, TabsList, TabsTrigger } from "./components/ui/tabs.js";
+import { Textarea } from "./components/ui/textarea.js";
+import "@fontsource/poppins/latin-400.css";
+import "@fontsource/poppins/latin-500.css";
+import "@fontsource/poppins/latin-600.css";
+import "@fontsource/poppins/latin-700.css";
+import "@fontsource/jetbrains-mono/latin-400.css";
+import "@fontsource/jetbrains-mono/latin-500.css";
+import "@fontsource/jetbrains-mono/latin-600.css";
 import "./styles.css";
+import "./panel.css";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false, staleTime: 15_000 } },
@@ -122,14 +149,14 @@ function LoginPage(): ReactNode {
           </div>
         </div>
 
-        <label>Username<input autoFocus autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} /></label>
-        <label>Password<input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
+        <Label>Username<Input autoFocus autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} /></Label>
+        <Label>Password<Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /></Label>
 
         {mutation.error && <p className="form-error" role="alert">{mutation.error.message}</p>}
 
-        <button className="primary" disabled={mutation.isPending || !username || !password}>
+        <Button size="lg" disabled={mutation.isPending || !username || !password}>
           {mutation.isPending ? "Signing in…" : "Sign in"}
-        </button>
+        </Button>
 
         <p className="hint">First run? The generated password is in <code>docker compose logs cs2-panel</code>.</p>
       </form>
@@ -158,12 +185,12 @@ function ChangePassword({ username }: { username: string }): ReactNode {
         <div className="icon-box"><ShieldCheck /></div>
         <div><p className="eyebrow">First sign-in · {username}</p><h2>Choose a permanent password</h2></div>
         <p className="muted">The bootstrap password is temporary. Use at least 12 characters.</p>
-        <label>Current password<input type="password" autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrent(e.target.value)} /></label>
-        <label>New password<input type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNext(e.target.value)} /></label>
-        <label>Confirm new password<input type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} /></label>
+        <Label>Current password<Input type="password" autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrent(e.target.value)} /></Label>
+        <Label>New password<Input type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNext(e.target.value)} /></Label>
+        <Label>Confirm new password<Input type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} /></Label>
         {confirm && newPassword !== confirm && <p className="form-error">Passwords do not match.</p>}
         {mutation.error && <p className="form-error" role="alert">{mutation.error.message}</p>}
-        <button className="primary" disabled={mutation.isPending || newPassword.length < 12 || newPassword !== confirm}>Save password</button>
+        <Button size="lg" disabled={mutation.isPending || newPassword.length < 12 || newPassword !== confirm}>Save password</Button>
       </form>
     </main>
   );
@@ -209,7 +236,7 @@ function PanelShell({ me, active, children }: { me: AuthResponse; active: string
           const Icon = item.icon;
           return <Link to={item.to} className={active === item.to ? "active" : ""} key={item.label}><Icon />{item.label}</Link>;
         })}</nav>
-        <div className="profile"><div className="avatar">{me.user.username.slice(0, 2).toUpperCase()}</div><div><strong>{me.user.username}</strong><small>{me.user.role}</small></div><button title="Sign out" onClick={() => logout.mutate()}><LogOut /></button></div>
+        <div className="profile"><div className="avatar">{me.user.username.slice(0, 2).toUpperCase()}</div><div><strong>{me.user.username}</strong><small>{me.user.role}</small></div><Button variant="ghost" size="icon-sm" title="Sign out" onClick={() => logout.mutate()}><LogOut /></Button></div>
       </aside>
       <div className="shell-content">
         <PendingRestartBanner me={me} />
@@ -253,12 +280,12 @@ function PendingRestartBanner({ me }: { me: AuthResponse }): ReactNode {
   const pendingConfig = drift.data.configDrift.filter((item) => !item.hotReloadable);
   const count = pendingEnv.length + pendingConfig.length;
   return <>
-    <div className="restart-banner" role="status">
+    <Alert variant="warning" className="restart-banner">
       <AlertTriangle />
-      <div><strong>{count} pending {count === 1 ? "change" : "changes"}</strong><span>Apply &amp; Restart is required for these settings to take effect.</span></div>
-      <button onClick={() => setReviewing(true)}>Review</button>
-      <button className="banner-apply" disabled={apply.isPending || jobId !== null} onClick={() => setReviewing(true)}>{jobId ? "Applying…" : "Apply & Restart"}</button>
-    </div>
+      <div><AlertTitle>{count} pending {count === 1 ? "change" : "changes"}</AlertTitle><AlertDescription>Apply &amp; Restart is required for these settings to take effect.</AlertDescription></div>
+      <Button variant="outline" size="sm" onClick={() => setReviewing(true)}>Review</Button>
+      <Button size="sm" disabled={apply.isPending || jobId !== null} onClick={() => setReviewing(true)}>{jobId ? "Applying…" : "Apply & Restart"}</Button>
+    </Alert>
     {reviewing && <DriftReview drift={drift.data} pending={apply.isPending} error={apply.error} onClose={() => setReviewing(false)} onApply={() => apply.mutate()} />}
   </>;
 }
@@ -266,19 +293,17 @@ function PendingRestartBanner({ me }: { me: AuthResponse }): ReactNode {
 function DriftReview({ drift, pending, error, onClose, onApply }: { drift: DriftResponse; pending: boolean; error: Error | null; onClose: () => void; onApply: () => void }): ReactNode {
   const env = drift.envDrift.filter((item) => item.restartRequired);
   const files = drift.configDrift.filter((item) => !item.hotReloadable);
-  return <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <section className="confirm-dialog drift-dialog" role="alertdialog" aria-modal="true" aria-labelledby="drift-title">
-      <div className="icon-box danger"><RefreshCw /></div>
-      <h2 id="drift-title">Review pending restart</h2>
-      <p className="muted">This recreates the game-server container and disconnects current players. The panel remains online.</p>
+  return <AlertDialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}>
+    <AlertDialogContent className="drift-dialog">
+      <AlertDialogHeader><div className="icon-box danger"><RefreshCw /></div><AlertDialogTitle>Review pending restart</AlertDialogTitle><AlertDialogDescription>This recreates the game-server container and disconnects current players. The panel remains online.</AlertDialogDescription></AlertDialogHeader>
       <div className="drift-list">
         {env.map((item) => <div key={item.key}><strong>{item.key}</strong>{item.isSecret ? <span>Secret changed</span> : <code>{item.running ?? "(unset)"} → {item.current ?? "(unset)"}</code>}</div>)}
         {files.map((item) => <div key={item.path}><strong>{item.path}</strong><span>Configuration changed</span></div>)}
       </div>
       {error && <p className="form-error" role="alert">{error.message}</p>}
-      <div className="dialog-actions"><button className="control" onClick={onClose} disabled={pending}>Cancel</button><button className="danger-button" onClick={onApply} disabled={pending}>{pending ? "Starting…" : "Apply & Restart"}</button></div>
-    </section>
-  </div>;
+      <AlertDialogFooter><Button variant="outline" onClick={onClose} disabled={pending}>Cancel</Button><Button variant="destructive" onClick={onApply} disabled={pending}>{pending ? "Starting…" : "Apply & Restart"}</Button></AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>;
 }
 
 function DashboardPage(): ReactNode {
@@ -330,23 +355,23 @@ function DashboardPage(): ReactNode {
         <header><div><p className="eyebrow">Control panel</p><h1>Good to see you, {me.data.user.username}.</h1><p className="muted">Monitor the container and run one safe lifecycle operation at a time.</p></div><ThemeButton /></header>
         <section className="metric-grid">
           <StatusMetric status={status.data} loading={status.isPending} />
-          <article className="metric"><div className="metric-icon"><Activity /></div><p>Container uptime</p><h2>{formatUptime(status.data?.uptimeSeconds)}</h2><span>{status.data?.startedAt ? `Started ${new Date(status.data.startedAt).toLocaleString()}` : "Not currently running"}</span></article>
-          <article className="metric"><div className="metric-icon"><TerminalSquare /></div><p>Container image</p><h2 className="image-name">{status.data?.image || "—"}</h2><span>{status.data?.health ? `Health: ${status.data.health}` : "No container health status"}</span></article>
+          <Card className="metric"><div className="metric-icon"><Activity /></div><p>Container uptime</p><h2>{formatUptime(status.data?.uptimeSeconds)}</h2><span>{status.data?.startedAt ? `Started ${new Date(status.data.startedAt).toLocaleString()}` : "Not currently running"}</span></Card>
+          <Card className="metric"><div className="metric-icon"><TerminalSquare /></div><p>Container image</p><h2 className="image-name">{status.data?.image || "—"}</h2><span>{status.data?.health ? `Health: ${status.data.health}` : "No container health status"}</span></Card>
         </section>
         <GameSnapshot status={status.data} />
         <section className="content-grid">
-          <article className="panel-card lifecycle-card">
-            <div className="card-head"><div><p className="eyebrow">Lifecycle</p><h2>Server controls</h2></div>{busy && <span className="pill running">Operation running</span>}</div>
+          <Card className="panel-card lifecycle-card">
+            <div className="card-head"><div><p className="eyebrow">Lifecycle</p><h2>Server controls</h2></div>{busy && <Badge className="running">Operation running</Badge>}</div>
             <p className="muted">Restart keeps the current environment. Apply &amp; Restart recreates the container and re-reads <code>.env</code>.</p>
             <div className="action-grid">
-              <button className="control start" disabled={busy || status.data?.state === "running"} onClick={() => requestAction("start")}><Play />Start</button>
-              <button className="control stop" disabled={busy || !isActive(status.data)} onClick={() => requestAction("stop")}><Power />Stop</button>
-              <button className="control" disabled={busy || !isActive(status.data)} onClick={() => requestAction("restart")}><RefreshCw />Restart</button>
-              <button className="control apply" disabled={busy} onClick={() => requestAction("apply")}><RefreshCw />Apply &amp; Restart</button>
-              <button className="control pull" disabled={busy} onClick={() => requestAction("pull")}><Download />Pull image</button>
+              <Button variant="outline" className="start" disabled={busy || status.data?.state === "running"} onClick={() => requestAction("start")}><Play />Start</Button>
+              <Button variant="outline" className="stop" disabled={busy || !isActive(status.data)} onClick={() => requestAction("stop")}><Power />Stop</Button>
+              <Button variant="outline" disabled={busy || !isActive(status.data)} onClick={() => requestAction("restart")}><RefreshCw />Restart</Button>
+              <Button disabled={busy} onClick={() => requestAction("apply")}><RefreshCw />Apply &amp; Restart</Button>
+              <Button variant="secondary" className="pull" disabled={busy} onClick={() => requestAction("pull")}><Download />Pull image</Button>
             </div>
             {lifecycle.error && <p className="form-error action-error" role="alert">{lifecycle.error.message}</p>}
-          </article>
+          </Card>
           <JobMonitor jobId={shownJobId} fallback={currentJob} />
         </section>
       </main>
@@ -365,7 +390,7 @@ function DashboardPage(): ReactNode {
 function GameSnapshot({ status }: { status: ServerStatus | undefined }): ReactNode {
   const game = status?.game;
   return (
-    <section className="game-snapshot panel-card">
+    <Card className="game-snapshot panel-card">
       <div><p className="eyebrow">Live game</p><h2>{game?.currentMap ?? "Waiting for RCON"}</h2><span className={`status ${status?.rcon.connected ? "good" : "quiet"}`}><i />{status?.rcon.connected ? "RCON connected" : status?.rcon.error ?? "RCON unavailable"}</span></div>
       <dl>
         <div><dt>Players</dt><dd>{game ? `${game.players} + ${game.bots} bots / ${game.maxPlayers}` : "—"}</dd></div>
@@ -373,7 +398,7 @@ function GameSnapshot({ status }: { status: ServerStatus | undefined }): ReactNo
         <div><dt>Next map</dt><dd>{game?.nextMap ?? "Automatic"}</dd></div>
       </dl>
       <div className="plugin-list">{status?.plugins.length ? status.plugins.map((plugin) => <span key={plugin.index}>{plugin.name} <b>{plugin.version}</b></span>) : <span>No plugin data yet</span>}</div>
-    </section>
+    </Card>
   );
 }
 
@@ -401,11 +426,11 @@ function StatusMetric({ status, loading }: { status: ServerStatus | undefined; l
   const state = loading ? "Checking…" : status?.state ?? "Unavailable";
   const healthy = status?.state === "running";
   return (
-    <article className="metric featured">
+    <Card className="metric featured">
       <div className="metric-icon"><Server /></div><p>Game server</p>
       <h2 className="capitalize">{state}</h2>
       <span className={`status ${healthy ? "good" : "quiet"}`}><i />{status?.health ?? status?.status ?? "Waiting for Docker"}</span>
-    </article>
+    </Card>
   );
 }
 
@@ -434,13 +459,13 @@ function JobMonitor({ jobId, fallback }: { jobId: string | null; fallback: Job |
   }, [jobId, client]);
 
   return (
-    <article className="panel-card job-card">
-      <div className="card-head"><div><p className="eyebrow">Latest operation</p><h2>{job ? job.kind === "apply" ? "Apply & Restart" : job.kind : "No jobs yet"}</h2></div>{job && <span className={`job-state ${job.state}`}>{job.state}</span>}</div>
+    <Card className="panel-card job-card">
+      <div className="card-head"><div><p className="eyebrow">Latest operation</p><h2>{job ? job.kind === "apply" ? "Apply & Restart" : job.kind : "No jobs yet"}</h2></div>{job && <Badge variant={job.state === "failed" ? "destructive" : job.state === "success" ? "secondary" : "default"} className={`job-state ${job.state}`}>{job.state}</Badge>}</div>
       {job ? <>
         <dl className="job-meta"><div><dt>Started by</dt><dd>{job.startedBy}</dd></div><div><dt>Exit code</dt><dd>{job.exitCode ?? "—"}</dd></div></dl>
         <pre className="job-output" aria-live="polite">{job.output || (job.state === "running" ? "Waiting for output…" : "Command completed without output.")}</pre>
       </> : <p className="muted empty-job">Start, stop, restart, apply, and pull operations will stream their output here and remain in SQLite.</p>}
-    </article>
+    </Card>
   );
 }
 
@@ -454,7 +479,7 @@ const actionCopy: Record<JobKind, { title: string; detail: string; confirm: stri
 
 function ConfirmLifecycle({ kind, pending, onCancel, onConfirm }: { kind: JobKind; pending: boolean; onCancel: () => void; onConfirm: () => void }): ReactNode {
   const copy = actionCopy[kind];
-  return <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onCancel(); }}><section className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title"><div className="icon-box danger"><AlertTriangle /></div><h2 id="confirm-title">{copy.title}</h2><p className="muted">{copy.detail}</p><div className="dialog-actions"><button className="control" onClick={onCancel} disabled={pending}>Cancel</button><button className={kind === "stop" ? "danger-button" : "primary"} onClick={onConfirm} disabled={pending}>{pending ? "Starting…" : copy.confirm}</button></div></section></div>;
+  return <AlertDialog open onOpenChange={(open) => { if (!open && !pending) onCancel(); }}><AlertDialogContent><AlertDialogHeader><div className="icon-box danger"><AlertTriangle /></div><AlertDialogTitle>{copy.title}</AlertDialogTitle><AlertDialogDescription>{copy.detail}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><Button variant="outline" onClick={onCancel} disabled={pending}>Cancel</Button><Button variant={kind === "stop" ? "destructive" : "default"} onClick={onConfirm} disabled={pending}>{pending ? "Starting…" : copy.confirm}</Button></AlertDialogFooter></AlertDialogContent></AlertDialog>;
 }
 
 function useSessionRedirect(): ReturnType<typeof useQuery<AuthResponse>> {
@@ -551,10 +576,10 @@ function SettingsPage(): ReactNode {
       <header><div><p className="eyebrow">Configuration</p><h1>Server settings</h1><p className="muted">Edit the existing <code>.env</code> without losing its comments. Live-capable cvars are pushed over RCON when saved.</p></div><ThemeButton /></header>
       <div className="settings-layout">
         <aside className="settings-tabs" aria-label="Settings groups">
-          {SETTINGS_GROUPS.map((item) => <button className={group === item ? "active" : ""} onClick={() => setGroup(item)} key={item}><span>{item === "admin" ? "Legacy Admin" : ENV_GROUP_LABELS[item]}</span><ChevronDown /></button>)}
-          <label className="advanced-toggle"><input type="checkbox" checked={showAdvanced} onChange={(event) => setShowAdvanced(event.target.checked)} />Show advanced fields</label>
+          {SETTINGS_GROUPS.map((item) => <Button variant="ghost" className={group === item ? "active" : ""} onClick={() => setGroup(item)} key={item}><span>{item === "admin" ? "Legacy Admin" : ENV_GROUP_LABELS[item]}</span><ChevronDown /></Button>)}
+          <Label className="advanced-toggle"><Checkbox checked={showAdvanced} onCheckedChange={(checked) => setShowAdvanced(checked === true)} />Show advanced fields</Label>
         </aside>
-        <section className="panel-card settings-card">
+        <Card className="panel-card settings-card">
           <div className="settings-heading"><div><p className="eyebrow">{ENV_GROUP_LABELS[group]}</p><h2>{group === "addons" ? "MultiAddonManager" : ENV_GROUP_LABELS[group]}</h2></div><span>{groupSpecs.length} fields</span></div>
           {environment.isPending || schema.isPending ? <div className="settings-loading"><div className="spinner" /></div> : environment.error || schema.error ? <p className="form-error">{environment.error?.message ?? schema.error?.message}</p> : <div className="settings-fields">
             {groupSpecs.length ? groupSpecs.map((spec) => <SettingField
@@ -574,12 +599,12 @@ function SettingsPage(): ReactNode {
           {(warnings.length > 0 || environment.data?.findings.some((finding) => finding.severity === "warning")) && <div className="settings-warning"><AlertTriangle />{[...warnings, ...(environment.data?.findings ?? [])].filter((finding) => finding.severity === "warning").map((finding) => <span key={finding.message}>{finding.message}</span>)}</div>}
           {result && <div className="save-result"><Check /><div><strong>Saved {result.written.length} {result.written.length === 1 ? "setting" : "settings"}</strong><span>{result.appliedLive.filter((item) => item.ok).length} applied live · {result.pendingRestart.length} pending restart</span>{result.appliedLive.filter((item) => !item.ok).map((item) => <small key={item.key}>{item.key}: {item.error}</small>)}</div></div>}
           {(save.error || reveal.error) && <p className="form-error settings-error" role="alert">{save.error?.message ?? reveal.error?.message}</p>}
-        </section>
+        </Card>
       </div>
       <footer className="settings-footer">
         <div><strong>{Object.keys(changes).length} unsaved {Object.keys(changes).length === 1 ? "change" : "changes"}</strong><span>{errors.length ? `${errors.length} validation ${errors.length === 1 ? "error" : "errors"}` : "Compatible with the current mod versions"}</span></div>
-        <button className="control" onClick={discard} disabled={!Object.keys(changes).length || save.isPending}><RotateCcw />Discard</button>
-        <button className="primary save-button" onClick={() => save.mutate()} disabled={!Object.keys(changes).length || errors.length > 0 || save.isPending}><Save />{save.isPending ? "Saving…" : "Save & apply live"}</button>
+        <Button variant="outline" onClick={discard} disabled={!Object.keys(changes).length || save.isPending}><RotateCcw />Discard</Button>
+        <Button className="save-button" onClick={() => save.mutate()} disabled={!Object.keys(changes).length || errors.length > 0 || save.isPending}><Save />{save.isPending ? "Saving…" : "Save & apply live"}</Button>
       </footer>
     </main>
   </PanelShell>;
@@ -588,12 +613,12 @@ function SettingsPage(): ReactNode {
 function SettingField({ spec, value, configured, visible, clearing, revealing, error, onChange, onReveal, onClear }: { spec: EnvKeySpec; value: string; configured: boolean; visible: boolean; clearing: boolean; revealing: boolean; error?: string; onChange: (value: string) => void; onReveal: () => void; onClear: () => void }): ReactNode {
   const id = `setting-${spec.key}`;
   const control = spec.type === "boolean01"
-    ? <label className="switch"><input id={id} type="checkbox" checked={value === "1"} disabled={spec.panelManaged} onChange={(event) => onChange(event.target.checked ? "1" : "0")} /><span /></label>
+    ? <Switch id={id} checked={value === "1"} disabled={spec.panelManaged} onCheckedChange={(checked) => onChange(checked ? "1" : "0")} />
     : spec.type === "select"
-      ? <select id={id} value={value} disabled={spec.panelManaged} onChange={(event) => onChange(event.target.value)}>{spec.options?.map((option) => <option value={option} key={option}>{option}</option>)}</select>
-      : <div className="field-input-row"><input id={id} type={spec.secret && !visible ? "password" : spec.type === "number" || spec.type === "float" ? "number" : "text"} value={clearing ? "" : value} min={spec.min} max={spec.max} step={spec.step ?? (spec.type === "float" ? "any" : undefined)} disabled={spec.panelManaged} placeholder={spec.secret && configured && !visible ? "Configured — leave blank to keep" : spec.placeholder} autoComplete="off" onChange={(event) => onChange(event.target.value)} />{spec.secret && <><button className="icon-action" type="button" title={visible ? "Hide secret" : "Reveal secret"} onClick={onReveal} disabled={revealing}>{visible ? <EyeOff /> : <Eye />}</button>{configured && <button className="clear-secret" type="button" onClick={onClear}>Clear</button>}</>}</div>;
+      ? <NativeSelect id={id} value={value} disabled={spec.panelManaged} onChange={(event) => onChange(event.target.value)}>{spec.options?.map((option) => <option value={option} key={option}>{option}</option>)}</NativeSelect>
+      : <div className="field-input-row"><Input id={id} type={spec.secret && !visible ? "password" : spec.type === "number" || spec.type === "float" ? "number" : "text"} value={clearing ? "" : value} min={spec.min} max={spec.max} step={spec.step ?? (spec.type === "float" ? "any" : undefined)} disabled={spec.panelManaged} placeholder={spec.secret && configured && !visible ? "Configured — leave blank to keep" : spec.placeholder} autoComplete="off" onChange={(event) => onChange(event.target.value)} />{spec.secret && <><Button className="icon-action" type="button" title={visible ? "Hide secret" : "Reveal secret"} onClick={onReveal} disabled={revealing}>{visible ? <EyeOff /> : <Eye />}</Button>{configured && <Button className="clear-secret" type="button" onClick={onClear}>Clear</Button>}</>}</div>;
   return <div className={`setting-field ${error ? "invalid" : ""}`}>
-    <div className="field-copy"><label htmlFor={id}>{spec.label}</label><code>{spec.key}</code>{spec.description && <p>{spec.description}</p>}{spec.cvar && <span className="live-label"><Activity />Applies live as {spec.cvar}</span>}{!spec.cvar && !spec.panelManaged && <span className="restart-label"><RefreshCw />Requires restart</span>}</div>
+    <div className="field-copy"><Label htmlFor={id}>{spec.label}</Label><code>{spec.key}</code>{spec.description && <p>{spec.description}</p>}{spec.cvar && <span className="live-label"><Activity />Applies live as {spec.cvar}</span>}{!spec.cvar && !spec.panelManaged && <span className="restart-label"><RefreshCw />Requires restart</span>}</div>
     <div className="field-control">{control}{error && <small className="field-error">{error}</small>}{spec.panelManaged && <small>Managed elsewhere and read-only.</small>}</div>
   </div>;
 }
@@ -625,9 +650,10 @@ function LogsPage(): ReactNode {
 
   const normalizedFilter = filter.trim().toLowerCase();
   const shown = normalizedFilter ? entries.filter((entry) => entry.line.toLowerCase().includes(normalizedFilter)) : entries;
-  useEffect(() => {
+  const newestShownEntry = shown.at(-1);
+  useLayoutEffect(() => {
     if (follow) outputRef.current?.scrollTo({ top: outputRef.current.scrollHeight });
-  }, [shown.length, follow]);
+  }, [newestShownEntry, normalizedFilter, follow]);
 
   if (me.isPending) return <div className="center"><div className="spinner" /></div>;
   if (me.isError) return null;
@@ -636,15 +662,12 @@ function LogsPage(): ReactNode {
     <PanelShell me={me.data} active="/logs">
       <main className="dashboard page-dashboard">
         <header><div><p className="eyebrow">Observability</p><h1>Live logs</h1><p className="muted">Follow container startup output or the newest CS2 game log without loading unbounded history.</p></div><ThemeButton /></header>
-        <section className="panel-card log-panel">
+        <Card className="panel-card log-panel">
           <div className="log-toolbar">
-            <div className="tabs" role="tablist" aria-label="Log source">
-              <button className={source === "docker" ? "active" : ""} onClick={() => setSource("docker")} role="tab">Container</button>
-              <button className={source === "game" ? "active" : ""} onClick={() => setSource("game")} role="tab">Game</button>
-            </div>
-            <label className="log-filter"><span className="sr-only">Filter logs</span><input placeholder="Filter lines…" value={filter} onChange={(event) => setFilter(event.target.value)} /></label>
-            <button className={`follow-toggle ${follow ? "active" : ""}`} aria-pressed={follow} onClick={() => setFollow((value) => !value)}>Follow</button>
-            <span className={`stream-badge ${connection === "Live" ? "live" : ""}`}>{connection}</span>
+            <Tabs value={source} onValueChange={(value) => setSource(value as "docker" | "game")}><TabsList aria-label="Log source"><TabsTrigger value="docker">Container</TabsTrigger><TabsTrigger value="game">Game</TabsTrigger></TabsList></Tabs>
+            <Label className="log-filter"><span className="sr-only">Filter logs</span><Input placeholder="Filter lines…" value={filter} onChange={(event) => setFilter(event.target.value)} /></Label>
+            <Button variant={follow ? "secondary" : "outline"} size="sm" aria-pressed={follow} onClick={() => setFollow((value) => !value)}>Follow</Button>
+            <Badge variant="outline" className={`stream-badge ${connection === "Live" ? "live" : ""}`}>{connection}</Badge>
           </div>
           <div className="log-output" ref={outputRef} aria-live="polite" onScroll={(event) => {
             const element = event.currentTarget;
@@ -653,7 +676,7 @@ function LogsPage(): ReactNode {
             {shown.length ? shown.map((entry) => <div className="log-line" key={`${entry.source}-${entry.id}`}><time>{new Date(entry.receivedAt).toLocaleTimeString()}</time><span>{entry.line || " "}</span></div>) : <p className="terminal-empty">{connection === "Live" ? "No matching log lines." : "Waiting for the log stream…"}</p>}
           </div>
           <footer><span>{shown.length} of {entries.length} buffered lines</span>{source === "game" && <span>{files.data?.length ?? 0} game log files · newest file streams automatically</span>}</footer>
-        </section>
+        </Card>
       </main>
     </PanelShell>
   );
@@ -702,21 +725,21 @@ function ConsolePage(): ReactNode {
     <PanelShell me={me.data} active="/console">
       <main className="dashboard page-dashboard">
         <header><div><p className="eyebrow">Owner tools</p><h1>RCON console</h1><p className="muted">Commands are serialized through one authenticated connection. Output is capped at 8 MB per response.</p></div><ThemeButton /></header>
-        <section className="panel-card console-panel">
-          <div className="console-head"><span className={`stream-badge ${status.data?.connected ? "live" : ""}`}>{status.isPending ? "Checking RCON" : status.data?.connected ? "Connected" : "Disconnected"}</span><span>{commands.isPending ? "Loading command index…" : `${commands.data?.commands.length ?? 0} commands indexed`}</span><button onClick={() => setHistory([])} disabled={!history.length}>Clear</button></div>
+        <Card className="panel-card console-panel">
+          <div className="console-head"><Badge variant="outline" className={`stream-badge ${status.data?.connected ? "live" : ""}`}>{status.isPending ? "Checking RCON" : status.data?.connected ? "Connected" : "Disconnected"}</Badge><span>{commands.isPending ? "Loading command index…" : `${commands.data?.commands.length ?? 0} commands indexed`}</span><Button variant="ghost" size="sm" onClick={() => setHistory([])} disabled={!history.length}>Clear</Button></div>
           <div className="console-output" ref={outputRef} aria-live="polite">
             {history.length ? history.map((entry, index) => <div className="console-entry" key={`${entry.executedAt}-${index}`}><div><time>{new Date(entry.executedAt).toLocaleTimeString()}</time><b>&gt; {entry.command}</b></div><pre>{entry.output || "Command completed without output."}</pre></div>) : <p className="terminal-empty">Run a command to see its sanitized RCON response here.</p>}
           </div>
           <form className="console-form" onSubmit={submit}>
-            <span aria-hidden="true">&gt;</span><input autoFocus list="rcon-command-list" placeholder="status" value={command} onChange={(event) => { setCommand(event.target.value); setPendingDanger(null); }} maxLength={1024} autoComplete="off" />
+            <span aria-hidden="true">&gt;</span><Input autoFocus list="rcon-command-list" placeholder="status" value={command} onChange={(event) => { setCommand(event.target.value); setPendingDanger(null); }} maxLength={1024} autoComplete="off" />
             <datalist id="rcon-command-list">{commands.data?.commands.map((item) => <option value={item} key={item} />)}</datalist>
-            <button className="primary" disabled={!command.trim() || execution.isPending}>{execution.isPending ? "Running…" : "Run"}</button>
+            <Button disabled={!command.trim() || execution.isPending}>{execution.isPending ? "Running…" : "Run"}</Button>
           </form>
           {execution.error && <p className="form-error console-error" role="alert">{execution.error.message}</p>}
-        </section>
+        </Card>
       </main>
     </PanelShell>
-    {pendingDanger && <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingDanger(null); }}><section className="confirm-dialog" role="alertdialog" aria-modal="true"><div className="icon-box danger"><AlertTriangle /></div><h2>Run a disruptive command?</h2><p className="muted"><code>{pendingDanger}</code> can stop, restart, or materially alter the game server.</p><div className="dialog-actions"><button className="control" onClick={() => setPendingDanger(null)}>Cancel</button><button className="danger-button" onClick={() => execution.mutate(pendingDanger)}>Run command</button></div></section></div>}
+    {pendingDanger && <AlertDialog open onOpenChange={(open) => { if (!open && !execution.isPending) setPendingDanger(null); }}><AlertDialogContent><AlertDialogHeader><div className="icon-box danger"><AlertTriangle /></div><AlertDialogTitle>Run a disruptive command?</AlertDialogTitle><AlertDialogDescription><code>{pendingDanger}</code> can stop, restart, or materially alter the game server.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><Button variant="outline" onClick={() => setPendingDanger(null)}>Cancel</Button><Button variant="destructive" onClick={() => execution.mutate(pendingDanger)}>Run command</Button></AlertDialogFooter></AlertDialogContent></AlertDialog>}
   </>;
 }
 
@@ -746,7 +769,7 @@ function ThemeButton(): ReactNode {
     document.documentElement.classList.toggle("dark");
     setDark(document.documentElement.classList.contains("dark"));
   };
-  return <button className="theme-button" onClick={toggle} aria-label={`Use ${dark ? "light" : "dark"} theme`}>{dark ? <Sun /> : <Moon />}</button>;
+  return <Button variant="outline" size="icon" className="theme-button" onClick={toggle} aria-label={`Use ${dark ? "light" : "dark"} theme`}>{dark ? <Sun /> : <Moon />}</Button>;
 }
 
 const rootRoute = createRootRoute({ component: SetupErrorScreen });

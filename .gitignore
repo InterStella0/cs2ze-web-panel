@@ -7,3 +7,4 @@ panel/web/dist/
 panel/server/dist/
 panel/shared/dist/
 .idea/
+server-config/

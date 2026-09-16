@@ -91,7 +91,7 @@ test("Step 3/4/5 routes enforce auth and safely manage runtime plus catalog data
   const cs2DataDir = path.join(root, "cs2-data");
   const binDir = path.join(root, "bin");
   const logDir = path.join(cs2DataDir, "game", "csgo", "logs");
-  const configDir = path.join(projectDir, "config", "cs2fixes");
+  const configDir = path.join(projectDir, "server-config", "cs2fixes");
   const liveConfigDir = path.join(cs2DataDir, "game", "csgo", "addons", "cs2fixes", "configs");
   await Promise.all([projectDir, dataDir, binDir, logDir, configDir, liveConfigDir].map((directory) => fs.mkdir(directory, { recursive: true })));
   const composeFile = path.join(projectDir, "compose.yaml");
@@ -296,7 +296,7 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   const liveMaps = await fs.readFile(path.join(liveConfigDir, "maplist.jsonc"), "utf8");
   assert.equal(sourceMaps, liveMaps);
   assert.match(sourceMaps, /ze_workshop_test/);
-  assert.ok((await fs.readdir(path.join(dataDir, "backups", "config__cs2fixes__maplist.jsonc"))).length >= 1);
+  assert.ok((await fs.readdir(path.join(dataDir, "backups", "server-config__cs2fixes__maplist.jsonc"))).length >= 1);
   assert.equal((await mutate("/api/maps/next", { map: "ze_workshop_test" })).status, 200);
   assert.equal((await mutate("/api/maps/current", { map: "ze_workshop_test", confirmMapChange: true })).status, 200);
   assert.equal((await mutate("/api/maps/reload", { confirmMapRestart: true })).status, 200);
@@ -324,7 +324,7 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   assert.equal(migrated.envOverrideActive, false);
   assert.equal(migrated.admins.find((item) => item.steamid === "76561190000000002").name, "Legacy Owner");
   assert.match(await fs.readFile(path.join(projectDir, ".env"), "utf8"), /^CS2_ADMIN_STEAMID=$/m);
-  assert.ok((await fs.readdir(path.join(dataDir, "backups", "config__cs2fixes__admins.jsonc"))).length >= 1);
+  assert.ok((await fs.readdir(path.join(dataDir, "backups", "server-config__cs2fixes__admins.jsonc"))).length >= 1);
 
   await fs.writeFile(path.join(projectDir, ".env"), writtenEnv.replace("METAMOD_VERSION=2.0.0-git1411", "METAMOD_VERSION=2.0.0-git1500"));
   const blockedApply = await fetch(`${baseUrl}/api/server/apply`, {

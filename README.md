@@ -13,7 +13,7 @@ joedwards32/cs2
 
 The server updates through SteamCMD on every container start. After that update,
 the mounted `pre.sh` hook installs or updates the pinned mod archives, repairs the
-Metamod entry in `gameinfo.gi`, installs the repository's known-good ZE configs,
+Metamod entry in `gameinfo.gi`, installs the persistent ZE runtime configs,
 writes the environment-managed settings, and starts CS2.
 
 ## Start
@@ -75,24 +75,32 @@ Useful entries:
 - `MAM_EXTRA_ADDONS`: comma-separated server/client workshop content addon IDs.
   `3160448201` is a content pack, not a playable map ID, so it belongs here.
 - `CS2_ADDITIONAL_ARGS`: arguments passed to the CS2 process by the base image.
-  (`STARTUP_ARGS` is not consumed by `joedwards32/cs2`.)
+  Defaults to `-disable_workshop_command_filtering`, which allows CS2Fixes to
+  intercept the startup collection command. (`STARTUP_ARGS` is not consumed by
+  `joedwards32/cs2`.)
 - `MAM_CLIENT_EXTRA_ADDONS`: comma-separated client-only addon IDs.
 - `CS2FIXES_EXTRA_CFG`: semicolon-separated extra CS2Fixes/ZR cvar lines.
 - `MODS_FORCE_REINSTALL=1`: download all enabled mod archives again on the next
   start. Put it back to `0` afterward.
 
-Structured configs are version-controlled under `config/` and copied into the
-game tree on every container start:
+Structured config defaults are version-controlled under `config/`. On first
+start, `prepare-data` copies them into the ignored `server-config/` runtime
+directory. The panel edits `server-config/`, and the installer copies that
+runtime directory into the game tree on every server start. Existing runtime
+files are never replaced by newer Git defaults, so `git pull` cannot overwrite
+panel or operator settings.
 
-- `config/cs2fixes/maplist.jsonc`: nomination and map-vote catalog.
-- `config/cs2fixes/cvar_whitelist.jsonc`: safe map cvars.
-- `config/cs2fixes/admins.jsonc`: harmless fallback when no owner ID is set.
-- `config/cs2fixes/zr/`: human/zombie classes, weapons, and hitgroups.
-- `config/cs2fixes/maps/`: optional per-map CS2Fixes cfg files.
-- `config/stripper/`: optional per-map StripperCS2 files.
+- `server-config/cs2fixes/maplist.jsonc`: nomination and map-vote catalog.
+- `server-config/cs2fixes/cvar_whitelist.jsonc`: safe map cvars.
+- `server-config/cs2fixes/admins.jsonc`: harmless fallback when no owner ID is set.
+- `server-config/cs2fixes/zr/`: human/zombie classes, weapons, and hitgroups.
+- `server-config/cs2fixes/maps/`: optional per-map CS2Fixes cfg files.
+- `server-config/stripper/`: optional per-map StripperCS2 files.
 
-Edit those repository files, then run `docker compose up -d --force-recreate`.
-Their generated destinations are:
+Edit the runtime files (directly or through the panel), then run
+`docker compose up -d --force-recreate`. To adopt a changed repository default,
+copy that specific file from `config/` into `server-config/` intentionally.
+Generated destinations are:
 
 - `cs2-data/game/csgo/cfg/cs2fixes/cs2fixes.cfg`
 - `cs2-data/game/csgo/addons/cs2fixes/configs/maplist.jsonc`
@@ -102,7 +110,7 @@ Their generated destinations are:
 
 The installer only replaces its block between `BEGIN CS2ZE MANAGED` and
 `END CS2ZE MANAGED` in `cs2fixes.cfg`. It deliberately replaces the structured
-files above and `cfg/cs2fixes/server.cfg` from the repository/`.env`, so the
+files above and `cfg/cs2fixes/server.cfg` from `server-config/`/`.env`, so the
 configuration cannot drift between rebuilds.
 
 Player chat commands include `!guns`, `!zclass`, `!flashlight` (or the flashlight
@@ -148,23 +156,23 @@ docker compose up -d
 
 ### Deploying code updates to a running server
 
-`config/` and `.env` are **live server state**, not source code: the panel writes
-your map catalog, admin list and settings there. Syncing the repository to a
-server with a naive `rsync -a` will overwrite them and silently revert whatever
-the panel has saved. Always exclude them:
+`server-config/`, `cs2-data/`, `panel-data/`, and `.env` are persistent live
+server state. `config/` is source-controlled defaults and should be deployed
+with the code. Exclude the live state when syncing a checkout:
 
 ```sh
 rsync -a --delete \
   --exclude 'cs2-data/' --exclude 'panel-data/' \
-  --exclude 'config/'   --exclude '.env' \
+  --exclude 'server-config/' --exclude '.env' \
   --exclude '.git/' --exclude 'node_modules/' --exclude 'dist/' \
   ./ user@host:/path/to/cs2ze-docker/
 ```
 
-If the source and the copy in the game tree ever diverge, the panel's Maps and
-Admins pages flag it as out of sync and a save re-copies the source over it.
+If `server-config/` and the copy in the game tree ever diverge, the panel's Maps
+and Admins pages flag it as out of sync and a save re-copies the runtime source
+over it.
 
-This stack declares no Docker named volumes. Both `./cs2-data` and `./config`
-are host bind mounts, so `docker compose down -v` cannot delete them. Do not
-manually delete `./cs2-data` unless you intend to remove the server installation,
-downloaded workshop content, and logs.
+This stack declares no Docker named volumes. `./cs2-data`, `./server-config`,
+and `./panel-data` are host bind mounts, so `docker compose down -v` cannot
+delete them. Do not manually delete `./cs2-data` unless you intend to remove the
+server installation, downloaded workshop content, and logs.

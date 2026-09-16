@@ -20,7 +20,38 @@ const valueAfterLabel = (text: string, label: string): string | null => {
   return match?.[1]?.trim() || null;
 };
 
+const playerAddress = /^(?:\d{1,3}(?:\.\d{1,3}){3}|\[[0-9a-f:]+\]|loopback):\d+$/i;
+
+function unquotePlayerName(value: string): string {
+  const trimmed = value.trim();
+  const quote = trimmed[0];
+  const unwrapped = (quote === '"' || quote === "'") && trimmed.at(-1) === quote
+    ? trimmed.slice(1, -1)
+    : trimmed;
+  return unwrapped.replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+}
+
 function parsePlayerLine(line: string): Player | null {
+  // Current CS2 builds emit rows without a leading # or Steam ID:
+  //   id time ping loss state rate address 'name'
+  const current = line.match(/^\s*(\d+)\s+(\d{1,3}:\d{2}(?::\d{2})?)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(\S+)\s+(.+?)\s*$/);
+  if (current && playerAddress.test(current[7]!)) {
+    const ping = Number(current[3]);
+    const loss = Number(current[4]);
+    return {
+      userid: current[1]!,
+      name: unquotePlayerName(current[8]!),
+      steamid: null,
+      ping: Number.isFinite(ping) ? ping : null,
+      loss: Number.isFinite(loss) ? loss : null,
+      state: current[5]!,
+      time: current[2]!,
+      address: current[7]!,
+      isBot: /^loopback:/i.test(current[7]!),
+      isAdmin: false,
+    };
+  }
+
   // CS2 has emitted both "# userid ..." and "# slot userid ..." layouts.
   const match = line.match(/^\s*#\s*(?:(\d+)\s+)?(\d+)\s+"((?:\\.|[^"])*)"\s+(\S+)\s*(.*)$/);
   if (!match) return null;
@@ -31,13 +62,13 @@ function parsePlayerLine(line: string): Player | null {
   const ping = connectedAt >= 0 ? Number(tokens[connectedAt + 1]) : Number.NaN;
   const loss = connectedAt >= 0 ? Number(tokens[connectedAt + 2]) : Number.NaN;
   const state = tokens.find((token) => /^(active|connected|connecting|challenging|spawning|zombie)$/i.test(token)) ?? "unknown";
-  const address = tokens.find((token) => /^(?:\d{1,3}(?:\.\d{1,3}){3}|\[[0-9a-f:]+\]|loopback):\d+$/i.test(token)) ?? null;
+  const address = tokens.find((token) => playerAddress.test(token)) ?? null;
   const steamToken = match[4] ?? "";
   const isBot = /^(?:BOT|HLTV)$/i.test(steamToken);
 
   return {
     userid: match[2]!,
-    name: match[3]!.replace(/\\"/g, '"').replace(/\\\\/g, "\\"),
+    name: unquotePlayerName(`"${match[3]!}"`),
     steamid: isBot || /^(?:pending|unknown)$/i.test(steamToken) ? null : steamToken,
     ping: Number.isFinite(ping) ? ping : null,
     loss: Number.isFinite(loss) ? loss : null,
@@ -96,6 +127,18 @@ export function parseStatus(text: string): ParsedStatus {
 export function parseWho(text: string): WhoPlayer[] {
   const out: WhoPlayer[] = [];
   for (const line of text.split("\n")) {
+    const table = line.match(/^\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(7656119\d{10})\s*\|\s*$/);
+    if (table) {
+      const flags = table[2]!.trim();
+      out.push({
+        userid: null,
+        name: table[1]!.trim(),
+        steamid: table[3]!,
+        isAdmin: flags !== "" && flags !== "-",
+      });
+      continue;
+    }
+
     const steamid = line.match(/\b(7656119\d{10}|STEAM_[0-5]:[01]:\d+)\b/i)?.[1] ?? null;
     const userid = line.match(/(?:#|user\s*id\s*:?\s*)(\d+)/i)?.[1] ?? null;
     if (!steamid && !userid) continue;
@@ -107,14 +150,21 @@ export function parseWho(text: string): WhoPlayer[] {
 
 export function mergeWhoPlayers(players: Player[], whoText: string): Player[] {
   const who = parseWho(whoText);
+  const used = new Set<WhoPlayer>();
   const matched = players.map((player) => {
     const entry = who.find((candidate) =>
-      (candidate.userid !== null && candidate.userid === player.userid)
-      || (candidate.steamid !== null && candidate.steamid === player.steamid));
-    return entry ? { ...player, steamid: entry.steamid ?? player.steamid, isAdmin: entry.isAdmin } : player;
+      !used.has(candidate) && (
+        (candidate.userid !== null && candidate.userid === player.userid)
+        || (candidate.steamid !== null && candidate.steamid === player.steamid)
+        || (candidate.name !== null && candidate.name.localeCompare(player.name, undefined, { sensitivity: "accent" }) === 0)
+      ));
+    if (!entry) return player;
+    used.add(entry);
+    return { ...player, steamid: entry.steamid ?? player.steamid, isAdmin: entry.isAdmin };
   });
 
   for (const entry of who) {
+    if (used.has(entry)) continue;
     if (matched.some((player) => player.userid === entry.userid || (entry.steamid && player.steamid === entry.steamid))) continue;
     matched.push({
       userid: entry.userid ?? "unknown",

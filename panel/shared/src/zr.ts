@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-/** Schema for config/cs2fixes/zr/playerclass.jsonc. */
+/** Schema for server-config/cs2fixes/zr/playerclass.jsonc. */
 
 export const zrModelSchema = z.object({
   modelname: z.string().min(1),
