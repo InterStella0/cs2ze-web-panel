@@ -6,3 +6,4 @@ node_modules/
 panel/web/dist/
 panel/server/dist/
 panel/shared/dist/
+.idea/
