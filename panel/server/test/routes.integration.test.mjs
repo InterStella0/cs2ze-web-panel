@@ -255,11 +255,11 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   })).status, 403);
   const saved = await fetch(`${baseUrl}/api/env`, {
     method: "PATCH", headers: { "content-type": "application/json", cookie, "x-cs2ze-csrf": auth.csrfToken },
-    body: JSON.stringify({ changes: { ZE_ROUND_TIME: "45", ZE_ROUND_MONEY: "15000", CS2_MAXPLAYERS: "40" }, applyLive: true }),
+    body: JSON.stringify({ changes: { ZE_ROUND_TIME: "45", ZE_ROUND_MONEY: "15000", CS2_MAXPLAYERS: "40", CS2_BOT_QUOTA: "8", CS2_BOT_QUOTA_MODE: "normal" }, applyLive: true }),
   });
   assert.equal(saved.status, 200);
   const savedResult = await saved.json();
-  assert.deepEqual(savedResult.written.sort(), ["CS2_MAXPLAYERS", "ZE_ROUND_MONEY", "ZE_ROUND_TIME"]);
+  assert.deepEqual(savedResult.written.sort(), ["CS2_BOT_QUOTA", "CS2_BOT_QUOTA_MODE", "CS2_MAXPLAYERS", "ZE_ROUND_MONEY", "ZE_ROUND_TIME"]);
   assert.equal(savedResult.appliedLive[0].key, "ZE_ROUND_TIME");
   assert.equal(savedResult.appliedLive[0].ok, true);
   assert.deepEqual(savedResult.pendingRestart, ["CS2_MAXPLAYERS"]);
@@ -267,11 +267,15 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   assert.ok(rcon.commands.includes("mp_afterroundmoney 15000"));
   assert.ok(rcon.commands.includes("mp_maxmoney 15000"));
   assert.ok(rcon.commands.includes("mp_startmoney 15000"));
+  assert.ok(rcon.commands.includes("bot_quota 8"));
+  assert.ok(rcon.commands.includes("bot_quota_mode normal"));
   const writtenEnv = await fs.readFile(path.join(projectDir, ".env"), "utf8");
   assert.match(writtenEnv, /^# preserved comment/m);
   assert.match(writtenEnv, /^ZE_ROUND_TIME=45$/m);
   assert.match(writtenEnv, /^ZE_ROUND_MONEY=15000$/m);
   assert.match(writtenEnv, /^CS2_MAXPLAYERS=40$/m);
+  assert.match(writtenEnv, /^CS2_BOT_QUOTA=8$/m);
+  assert.match(writtenEnv, /^CS2_BOT_QUOTA_MODE=normal$/m);
   assert.ok((await fs.readdir(path.join(dataDir, "backups", ".env"))).length >= 1);
 
   const drift = await (await get("/api/drift")).json();

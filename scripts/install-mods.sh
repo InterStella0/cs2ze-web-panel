@@ -221,7 +221,14 @@
       printf 'mp_roundtime_defuse 0\n'
       printf 'mp_roundtime_hostage 0\n'
       printf 'mp_freezetime %s\n' "${ZE_FREEZE_TIME:-5}"
-      printf 'mp_buytime %s\n' "${ZE_BUY_TIME:-60}"
+      printf 'mp_buytime %s\n' "${ZE_BUY_TIME:-9999999}"
+      printf 'mp_buy_anywhere %s\n' "${ZE_BUY_ANYWHERE:-1}"
+      printf 'mp_buy_allow_guns 255\n'
+      printf 'mp_buy_allow_grenades 1\n'
+      printf 'mp_weapons_allow_typecount %s\n' "${ZE_WEAPON_BUY_LIMIT:--1}"
+      printf 'ammo_grenade_limit_default %s\n' "${ZE_GRENADE_BUY_LIMIT:-2}"
+      printf 'ammo_grenade_limit_total %s\n' "${ZE_GRENADE_BUY_LIMIT:-2}"
+      printf 'ammo_grenade_limit_flashbang %s\n' "${ZE_GRENADE_BUY_LIMIT:-2}"
       printf 'mp_maxmoney %s\n' "$money"
       printf 'mp_startmoney %s\n' "$money"
       printf 'mp_afterroundmoney %s\n' "$money"
@@ -239,8 +246,11 @@
       printf 'mp_halftime 0\n'
       printf 'mp_endmatch_votenextmap 0\n'
       printf 'mp_round_restart_delay 5\n'
-      printf 'bot_quota 0\n'
-      printf 'bot_quota_mode fill\n'
+      printf 'bot_quota %s\n' "${CS2_BOT_QUOTA:-0}"
+      printf 'bot_quota_mode %s\n' "${CS2_BOT_QUOTA_MODE:-fill}"
+      if [ -n "${CS2_BOT_DIFFICULTY:-}" ]; then
+        printf 'bot_difficulty %s\n' "$CS2_BOT_DIFFICULTY"
+      fi
     } > "$server_config"
   }
 
@@ -302,6 +312,7 @@
 
   configure_gamemode_rules() {
     local money="${ZE_ROUND_MONEY:-16000}"
+    local grenade_limit="${ZE_GRENADE_BUY_LIMIT:-2}"
 
     # mp_do_warmup_period does not exist in CS2, and mp_warmuptime has a
     # minimum of 5; changing the latter also resets warmup. Remove the legacy
@@ -313,6 +324,14 @@
     set_gamemode_cvar mp_warmup_offline_enabled 0
     set_gamemode_cvar mp_warmup_online_enabled 0
     append_gamemode_command mp_warmup_end
+    set_gamemode_cvar mp_buytime "${ZE_BUY_TIME:-9999999}"
+    set_gamemode_cvar mp_buy_anywhere "${ZE_BUY_ANYWHERE:-1}"
+    set_gamemode_cvar mp_buy_allow_guns 255
+    set_gamemode_cvar mp_buy_allow_grenades 1
+    set_gamemode_cvar mp_weapons_allow_typecount "${ZE_WEAPON_BUY_LIMIT:--1}"
+    set_gamemode_cvar ammo_grenade_limit_default "$grenade_limit"
+    set_gamemode_cvar ammo_grenade_limit_total "$grenade_limit"
+    set_gamemode_cvar ammo_grenade_limit_flashbang "$grenade_limit"
     set_gamemode_cvar mp_maxmoney "$money"
     set_gamemode_cvar mp_startmoney "$money"
     set_gamemode_cvar mp_afterroundmoney "$money"

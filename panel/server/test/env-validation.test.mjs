@@ -43,3 +43,9 @@ test("shared env validation warns when CS2Fixes voting has no startup collection
   const findings = validateEnvRecord({ ...valid, CS2_HOST_WORKSHOP_COLLECTION: "" });
   assert.ok(findings.some((finding) => finding.severity === "warning" && /map voting needs a workshop collection/.test(finding.message)));
 });
+
+test("shared env validation bounds bot quota to available CS2 server slots", () => {
+  assert.deepEqual(validateEnvPatch(valid, { CS2_BOT_QUOTA: "32" }), []);
+  assert.ok(validateEnvPatch(valid, { CS2_BOT_QUOTA: "65" }).some((finding) => /at most 64/.test(finding.message)));
+  assert.ok(validateEnvPatch(valid, { CS2_BOT_QUOTA: "-1" }).some((finding) => /at least 0/.test(finding.message)));
+});

@@ -116,15 +116,18 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "STEAMAPPVALIDATE", group: "server", label: "Validate on update", type: "boolean01", default: "0", restartRequired: true, advanced: true },
 
   // ---- Bots ----------------------------------------------------------------
-  { key: "CS2_BOT_DIFFICULTY", group: "bots", label: "Bot difficulty", type: "string", default: "", restartRequired: true, advanced: true },
-  { key: "CS2_BOT_QUOTA", group: "bots", label: "Bot quota", type: "number", default: "0", restartRequired: true, advanced: true },
-  { key: "CS2_BOT_QUOTA_MODE", group: "bots", label: "Bot quota mode", type: "select", options: ["fill", "normal", "match"], default: "fill", restartRequired: true, advanced: true },
+  { key: "CS2_BOT_QUOTA", group: "bots", label: "Bot quota", description: "In normal mode this is the bot count. In fill mode it is the target total player count. Server slots still limit how many bots can join.", type: "number", default: "0", min: 0, max: 64, cvar: "bot_quota" },
+  { key: "CS2_BOT_QUOTA_MODE", group: "bots", label: "Bot quota mode", description: "normal keeps a fixed bot count; fill adds bots until the quota's total player count is reached; match adds this many bots per human.", type: "select", options: ["normal", "fill", "match"], default: "fill", cvar: "bot_quota_mode" },
+  { key: "CS2_BOT_DIFFICULTY", group: "bots", label: "Bot difficulty", description: "0 easy, 1 normal, 2 hard, 3 expert. Leave blank to use the game default.", type: "string", default: "", cvar: "bot_difficulty", advanced: true },
 
   // ---- Round / map rules (written to cfg/cs2fixes/server.cfg) ---------------
   { key: "ZE_MAP_TIME_LIMIT", group: "gameplay", label: "Map time limit (min)", type: "number", default: "40", min: 0, max: 600, cvar: "mp_timelimit" },
   { key: "ZE_ROUND_TIME", group: "gameplay", label: "Round time (min)", type: "number", default: "60", min: 1, max: 600, cvar: "mp_roundtime" },
   { key: "ZE_FREEZE_TIME", group: "gameplay", label: "Freeze time (s)", type: "number", default: "5", min: 0, max: 120, cvar: "mp_freezetime" },
-  { key: "ZE_BUY_TIME", group: "gameplay", label: "Buy time (s)", type: "number", default: "60", min: 0, max: 600, cvar: "mp_buytime" },
+  { key: "ZE_BUY_TIME", group: "gameplay", label: "Buy time (s)", description: "Defaults to an effectively unlimited buy period for Zombie Escape.", type: "number", default: "9999999", min: 0, max: 2147483647, cvar: "mp_buytime" },
+  { key: "ZE_BUY_ANYWHERE", group: "gameplay", label: "Buy anywhere", description: "Allow both teams to buy outside buy zones.", type: "boolean01", default: "1", cvar: "mp_buy_anywhere" },
+  { key: "ZE_WEAPON_BUY_LIMIT", group: "gameplay", label: "Weapon purchases per round", description: "Maximum purchases of each non-grenade weapon per round. -1 means unlimited.", type: "number", default: "-1", min: -1, max: 9999, cvar: "mp_weapons_allow_typecount" },
+  { key: "ZE_GRENADE_BUY_LIMIT", group: "gameplay", label: "Grenade purchases per round", description: "Maximum purchases of each grenade type per round and maximum grenades carried at once.", type: "number", default: "2", min: 0, max: 99, cvar: "ammo_grenade_limit_default", extraCvars: ["ammo_grenade_limit_total", "ammo_grenade_limit_flashbang"] },
   { key: "ZE_ROUND_MONEY", group: "gameplay", label: "Round start money", description: "Money every player gets at the start of each round. Sets mp_afterroundmoney, mp_maxmoney and mp_startmoney together.", type: "number", default: "16000", min: 0, max: 65535, cvar: "mp_afterroundmoney", extraCvars: ["mp_maxmoney", "mp_startmoney"] },
 
   // ---- ZombieReborn --------------------------------------------------------

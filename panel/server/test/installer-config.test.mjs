@@ -18,4 +18,17 @@ test("installer uses current CS2 warmup controls", async () => {
   assert.match(installer, /append_gamemode_command mp_warmup_end/);
   assert.match(installer, /ensure_trailing_newline "\$file"/);
   assert.match(installer, /-e "s\/\$\{setting\}/);
+  assert.match(installer, /mp_buytime %s.*ZE_BUY_TIME:-9999999/);
+  assert.match(installer, /mp_buy_anywhere %s.*ZE_BUY_ANYWHERE:-1/);
+  assert.match(installer, /mp_weapons_allow_typecount %s.*ZE_WEAPON_BUY_LIMIT:--1/);
+  assert.match(installer, /ammo_grenade_limit_default %s.*ZE_GRENADE_BUY_LIMIT:-2/);
+});
+
+test("installer persists the configured bot convars instead of disabling bots", async () => {
+  const installer = await fs.readFile(installerPath, "utf8");
+
+  assert.match(installer, /printf 'bot_quota %s\\n' "\$\{CS2_BOT_QUOTA:-0\}"/);
+  assert.match(installer, /printf 'bot_quota_mode %s\\n' "\$\{CS2_BOT_QUOTA_MODE:-fill\}"/);
+  assert.match(installer, /printf 'bot_difficulty %s\\n' "\$CS2_BOT_DIFFICULTY"/);
+  assert.doesNotMatch(installer, /printf 'bot_quota 0\\n'/);
 });

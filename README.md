@@ -80,6 +80,11 @@ Useful entries:
   `joedwards32/cs2`.)
 - `MAM_CLIENT_EXTRA_ADDONS`: comma-separated client-only addon IDs.
 - `CS2FIXES_EXTRA_CFG`: semicolon-separated extra CS2Fixes/ZR cvar lines.
+- `ZE_BUY_TIME` and `ZE_BUY_ANYWHERE`: default to an effectively unlimited
+  buy period from anywhere on the map.
+- `ZE_WEAPON_BUY_LIMIT`: `-1` allows unlimited purchases of non-grenade
+  weapons. `ZE_GRENADE_BUY_LIMIT` remains `2`; CS2Fixes uses it as the
+  per-grenade purchase cap, while the same value caps carried grenades.
 - `MODS_FORCE_REINSTALL=1`: download all enabled mod archives again on the next
   start. Put it back to `0` afterward.
 
