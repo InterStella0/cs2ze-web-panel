@@ -42,21 +42,37 @@ The included server is ready for Zombie Escape with:
 
 ## How it fits together
 
-```text
-Browser :8090
-    |
-    v
-CS2 ZE Panel ---- Docker socket ----> Compose lifecycle controls
-    |                                      |
-    +---- authenticated RCON ------------> CS2 server :27050
-    |                                      |
-    +---- .env + server-config/ ----------+
+```mermaid
+  flowchart LR
+      Browser["Browser<br/>:8090"]
 
-CS2 server
-    -> Metamod:Source
-       -> CS2Fixes / ZombieReborn
-       -> MultiAddonManager
-       -> StripperCS2
+      subgraph PanelSide["CS2 ZE Panel"]
+          Panel["Web Panel"]
+          Config[".env<br/>server-config/"]
+      end
+
+      Docker["Docker Socket"]
+      Compose["Compose Lifecycle<br/>Controls"]
+
+      subgraph CS2["CS2 Server :27050"]
+          Metamod["Metamod:Source"]
+
+          CS2Fixes["CS2Fixes<br/>ZombieReborn"]
+          MAM["MultiAddonManager"]
+          Stripper["StripperCS2"]
+
+          Metamod --> CS2Fixes
+          Metamod --> MAM
+          Metamod --> Stripper
+      end
+
+      Browser --> Panel
+      Panel -->|Docker socket| Docker
+      Docker --> Compose
+      Compose -->|start / stop / restart| CS2
+
+      Panel -->|authenticated RCON| CS2
+      Config --> Panel
 ```
 
 The Compose stack contains three services:
