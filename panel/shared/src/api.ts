@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { mapName, steamId64, workshopIdLike } from "./validators.js";
+import type { GflModelPreset, PlayerClasses } from "./zr.js";
 
 export type Role = "owner" | "operator";
 
@@ -225,6 +226,13 @@ export interface ConfigWriteResult {
   saved: true;
   liveSynced: boolean;
   liveError: string | null;
+}
+
+export interface PlayerClassesResponse {
+  classes: PlayerClasses;
+  presets: GflModelPreset[];
+  liveOutOfSync: boolean;
+  activation: "next_map";
 }
 
 export interface PlayerActionResult {

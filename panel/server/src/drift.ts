@@ -15,6 +15,7 @@ interface ContainerInspect {
 const HOT_RELOADABLE = new Set([
   "server-config/cs2fixes/maplist.jsonc",
   "server-config/cs2fixes/admins.jsonc",
+  "server-config/cs2fixes/zr/playerclass.jsonc",
   "server-config/cs2fixes/cvar_whitelist.jsonc",
   "server-config/cs2fixes/discordbots.jsonc",
 ]);

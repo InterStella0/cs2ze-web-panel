@@ -221,6 +221,7 @@
       printf 'mp_roundtime_defuse 0\n'
       printf 'mp_roundtime_hostage 0\n'
       printf 'mp_freezetime %s\n' "${ZE_FREEZE_TIME:-5}"
+      printf 'sv_falldamage_scale %s\n' "${ZE_FALL_DAMAGE_SCALE:-0}"
       printf 'mp_buytime %s\n' "${ZE_BUY_TIME:-9999999}"
       printf 'mp_buy_anywhere %s\n' "${ZE_BUY_ANYWHERE:-1}"
       printf 'mp_buy_allow_guns 255\n'

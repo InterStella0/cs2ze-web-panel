@@ -30,6 +30,7 @@ import {
   Save,
   Server,
   Settings,
+  Shirt,
   ShieldCheck,
   Sun,
   TerminalSquare,
@@ -51,6 +52,7 @@ import {
   type ServerStatus,
 } from "@cs2ze/shared";
 import { api, ApiError } from "./api.js";
+import { PlayerClassesContent } from "./classes.js";
 import { AdminsContent, MapsContent, PlayersContent } from "./management.js";
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert.js";
 import {
@@ -201,6 +203,7 @@ const nav = [
   { icon: BookOpenText, label: "Maps", to: "/maps" },
   { icon: Users, label: "Players", to: "/players" },
   { icon: ShieldCheck, label: "Admins", to: "/admins" },
+  { icon: Shirt, label: "Classes", to: "/classes", ownerOnly: true },
   { icon: Activity, label: "Logs", to: "/logs" },
   { icon: TerminalSquare, label: "Console", to: "/console", ownerOnly: true },
   { icon: Settings, label: "Settings", to: "/settings", ownerOnly: true },
@@ -231,7 +234,7 @@ function PanelShell({ me, active, children }: { me: AuthResponse; active: string
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand"><span className="brand-mark"><Gamepad2 /></span><span>CS2 <b>ZE</b></span></div>
+        <div className="brand"><span className="brand-mark"><Gamepad2 /></span><span>CS2 <b>ZE</b> Panel</span></div>
         <nav>{nav.filter((item) => !("ownerOnly" in item) || !item.ownerOnly || me.user.role === "owner").map((item) => {
           const Icon = item.icon;
           return <Link to={item.to} className={active === item.to ? "active" : ""} key={item.label}><Icon />{item.label}</Link>;
@@ -763,6 +766,15 @@ function AdminsPage(): ReactNode {
   return <ManagementPage active="/admins"><AdminsContent /></ManagementPage>;
 }
 
+function PlayerClassesPage(): ReactNode {
+  const me = useSessionRedirect();
+  if (me.isPending) return <div className="center"><div className="spinner" /></div>;
+  if (me.isError) return null;
+  if (me.data.user.mustChangePassword) return <ChangePassword username={me.data.user.username} />;
+  if (me.data.user.role !== "owner") return <PanelShell me={me.data} active="/classes"><main className="dashboard"><MessageScreen title="Owner access required" detail="Player classes and model paths are restricted to owners." /></main></PanelShell>;
+  return <PanelShell me={me.data} active="/classes"><main className="dashboard management-page classes-page"><PlayerClassesContent /></main></PanelShell>;
+}
+
 function ThemeButton(): ReactNode {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const toggle = (): void => {
@@ -781,7 +793,8 @@ const settingsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/set
 const mapsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/maps", component: MapsPage });
 const playersRoute = createRoute({ getParentRoute: () => rootRoute, path: "/players", component: PlayersPage });
 const adminsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/admins", component: AdminsPage });
-const routeTree = rootRoute.addChildren([indexRoute, loginRoute, logsRoute, consoleRoute, settingsRoute, mapsRoute, playersRoute, adminsRoute]);
+const classesRoute = createRoute({ getParentRoute: () => rootRoute, path: "/classes", component: PlayerClassesPage });
+const routeTree = rootRoute.addChildren([indexRoute, loginRoute, logsRoute, consoleRoute, settingsRoute, mapsRoute, playersRoute, adminsRoute, classesRoute]);
 const router = createRouter({ routeTree, defaultPreload: "intent" });
 
 declare module "@tanstack/react-router" {

@@ -1,41 +1,563 @@
 {
   "Human": {
-    "Human": {
+    "RandomHuman": {
       "enabled": true,
       "team_default": true,
       "health": 100,
       "models": [
         {
-          "modelname": "agents/models/ctm_fbi/ctm_fbi.vmdl",
+          "modelname": "characters/models/kaesar/mapper/mapper_nohitbox.vmdl",
           "color": "255 255 255",
-          "skins": [0]
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/tesla_armor/tesla_armor_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/scavenger/scavenger_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/master_chief/master_chief_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/isaac_clarke/isaac_clarke_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/hd2_b01_tac/hd2_b01_tac_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/earthgovsol/deadspace_earthgovsol_hitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/longus/ujel/ujel_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/left_shark/left_shark_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/final_fantasy/tifa_lockhart/tifa_lockhart_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/final_fantasy/tifa_lockhart/tifa_lockhart_bahamut_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/apple/vector/vector.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
         }
       ],
-      "scale": 1.0,
-      "speed": 1.0,
-      "gravity": 1.0,
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "Mapper": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "characters/models/kaesar/mapper/mapper_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "TeslaArmor": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/tesla_armor/tesla_armor_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "Scavenger": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/scavenger/scavenger_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "MasterChief": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/master_chief/master_chief_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "IsaacClarke": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/isaac_clarke/isaac_clarke_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "Helldiver": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/hd2_b01_tac/hd2_b01_tac_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "EarthGovSoldier": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/earthgovsol/deadspace_earthgovsol_hitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "Ujel": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/longus/ujel/ujel_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "LeftShark": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/gxp/left_shark/left_shark_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "TifaLockhart": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/gxp/final_fantasy/tifa_lockhart/tifa_lockhart_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "TifaBahamut": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/gxp/final_fantasy/tifa_lockhart/tifa_lockhart_bahamut_nohitbox.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "admin_flag": ""
+    },
+    "Vector": {
+      "enabled": true,
+      "team_default": false,
+      "health": 100,
+      "models": [
+        {
+          "modelname": "agents/models/apple/vector/vector.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
       "admin_flag": ""
     }
   },
   "Zombie": {
-    "Zombie": {
+    "RandomZombie": {
       "enabled": true,
       "team_default": true,
       "health": 10000,
       "models": [
         {
-          "modelname": "agents/models/tm_phoenix/tm_phoenix.vmdl",
-          "color": "255 100 100",
-          "skins": [0]
+          "modelname": "agents/models/s2ze/zombie_frozen/zombie_frozen.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/zombie_cultist/zombie_cultist.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/zombie_chris_walker/zombie_chris_walker.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/zombie_basic/zombie_basic.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/skeleton_bloody_lp/skeleton_bloody_lp.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/ghoul_soldier/ghoul_soldier.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/doom/marauder/marauder.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/classic_zombie/classic_zombie.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
         }
       ],
-      "scale": 1.0,
-      "speed": 1.0,
-      "gravity": 1.0,
-      "knockback": 1.0,
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
       "admin_flag": "",
       "health_regen_count": 250,
-      "health_regen_interval": 5.0
+      "health_regen_interval": 5
+    },
+    "FrozenZombie": {
+      "enabled": true,
+      "team_default": false,
+      "health": 10000,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/zombie_frozen/zombie_frozen.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
+      "admin_flag": "",
+      "health_regen_count": 250,
+      "health_regen_interval": 5
+    },
+    "CultistZombie": {
+      "enabled": true,
+      "team_default": false,
+      "health": 10000,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/zombie_cultist/zombie_cultist.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
+      "admin_flag": "",
+      "health_regen_count": 250,
+      "health_regen_interval": 5
+    },
+    "ChrisWalker": {
+      "enabled": true,
+      "team_default": false,
+      "health": 10000,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/zombie_chris_walker/zombie_chris_walker.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
+      "admin_flag": "",
+      "health_regen_count": 250,
+      "health_regen_interval": 5
+    },
+    "BasicZombie": {
+      "enabled": true,
+      "team_default": false,
+      "health": 10000,
+      "models": [
+        {
+          "modelname": "agents/models/s2ze/zombie_basic/zombie_basic.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
+      "admin_flag": "",
+      "health_regen_count": 250,
+      "health_regen_interval": 5
+    },
+    "BloodySkeleton": {
+      "enabled": true,
+      "team_default": false,
+      "health": 10000,
+      "models": [
+        {
+          "modelname": "agents/models/gxp/skeleton_bloody_lp/skeleton_bloody_lp.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
+      "admin_flag": "",
+      "health_regen_count": 250,
+      "health_regen_interval": 5
+    },
+    "GhoulSoldier": {
+      "enabled": true,
+      "team_default": false,
+      "health": 10000,
+      "models": [
+        {
+          "modelname": "agents/models/gxp/ghoul_soldier/ghoul_soldier.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
+      "admin_flag": "",
+      "health_regen_count": 250,
+      "health_regen_interval": 5
+    },
+    "Marauder": {
+      "enabled": true,
+      "team_default": false,
+      "health": 10000,
+      "models": [
+        {
+          "modelname": "agents/models/gxp/doom/marauder/marauder.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
+      "admin_flag": "",
+      "health_regen_count": 250,
+      "health_regen_interval": 5
+    },
+    "ClassicZombie": {
+      "enabled": true,
+      "team_default": false,
+      "health": 10000,
+      "models": [
+        {
+          "modelname": "agents/models/gxp/classic_zombie/classic_zombie.vmdl",
+          "color": "255 255 255",
+          "skins": [
+            0
+          ]
+        }
+      ],
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
+      "admin_flag": "",
+      "health_regen_count": 250,
+      "health_regen_interval": 5
     },
     "MotherZombie": {
       "enabled": true,
@@ -43,17 +565,69 @@
       "health": 40000,
       "models": [
         {
-          "modelname": "agents/models/tm_phoenix/tm_phoenix.vmdl",
+          "modelname": "agents/models/s2ze/zombie_frozen/zombie_frozen.vmdl",
           "color": "255 100 100",
-          "skins": [0]
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/zombie_cultist/zombie_cultist.vmdl",
+          "color": "255 100 100",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/zombie_chris_walker/zombie_chris_walker.vmdl",
+          "color": "255 100 100",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/s2ze/zombie_basic/zombie_basic.vmdl",
+          "color": "255 100 100",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/skeleton_bloody_lp/skeleton_bloody_lp.vmdl",
+          "color": "255 100 100",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/ghoul_soldier/ghoul_soldier.vmdl",
+          "color": "255 100 100",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/doom/marauder/marauder.vmdl",
+          "color": "255 100 100",
+          "skins": [
+            0
+          ]
+        },
+        {
+          "modelname": "agents/models/gxp/classic_zombie/classic_zombie.vmdl",
+          "color": "255 100 100",
+          "skins": [
+            0
+          ]
         }
       ],
-      "scale": 1.0,
-      "speed": 1.0,
-      "gravity": 1.0,
+      "scale": 1,
+      "speed": 1,
+      "gravity": 1,
+      "knockback": 1,
       "admin_flag": "",
       "health_regen_count": 500,
-      "health_regen_interval": 5.0
+      "health_regen_interval": 5
     }
   }
 }

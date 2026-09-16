@@ -8,6 +8,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { PacketFramer, PacketType, encodePacket } from "../dist/rcon/protocol.js";
+import { buildGflPlayerClasses } from "../../shared/dist/index.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");
@@ -93,17 +94,22 @@ test("Step 3/4/5 routes enforce auth and safely manage runtime plus catalog data
   const logDir = path.join(cs2DataDir, "game", "csgo", "logs");
   const configDir = path.join(projectDir, "server-config", "cs2fixes");
   const liveConfigDir = path.join(cs2DataDir, "game", "csgo", "addons", "cs2fixes", "configs");
-  await Promise.all([projectDir, dataDir, binDir, logDir, configDir, liveConfigDir].map((directory) => fs.mkdir(directory, { recursive: true })));
+  const classConfigDir = path.join(configDir, "zr");
+  const liveClassConfigDir = path.join(liveConfigDir, "zr");
+  await Promise.all([projectDir, dataDir, binDir, logDir, configDir, liveConfigDir, classConfigDir, liveClassConfigDir].map((directory) => fs.mkdir(directory, { recursive: true })));
   const composeFile = path.join(projectDir, "compose.yaml");
   await fs.writeFile(composeFile, "services: {}\n");
   await fs.writeFile(path.join(projectDir, ".env"), "# preserved comment\nCS2_RCONPW=secret\nZE_ROUND_TIME=60\nZE_ROUND_MONEY=16000\nCS2_MAXPLAYERS=32\nCS2_HOST_WORKSHOP_COLLECTION=3222748625\nMETAMOD_VERSION=2.0.0-git1411\nCS2FIXES_VERSION=v1.20.1\n");
   await fs.writeFile(path.join(logDir, "L-test.log"), "\x1b[32mgame ready\x1b[0m\r\n");
   const initialMaps = '{"Groups":{},"Maps":{"ze_integration":{"enabled":true,"workshop_id":123}}}\n';
   const initialAdmins = '{"Groups":{},"Admins":{"0":{"name":"Unconfigured placeholder","flags":"","immunity":0}}}\n';
+  const initialClasses = `${JSON.stringify(buildGflPlayerClasses("both"), null, 2)}\n`;
   await fs.writeFile(path.join(configDir, "maplist.jsonc"), initialMaps);
   await fs.writeFile(path.join(configDir, "admins.jsonc"), initialAdmins);
+  await fs.writeFile(path.join(classConfigDir, "playerclass.jsonc"), initialClasses);
   await fs.writeFile(path.join(liveConfigDir, "maplist.jsonc"), initialMaps);
   await fs.writeFile(path.join(liveConfigDir, "admins.jsonc"), initialAdmins);
+  await fs.writeFile(path.join(liveClassConfigDir, "playerclass.jsonc"), initialClasses);
 
   const dockerPath = path.join(binDir, "docker");
   const panelInspect = [{ Config: { Labels: {
@@ -159,7 +165,7 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   });
   await waitForHealth(baseUrl, () => output);
 
-  for (const endpoint of ["/api/rcon/status", "/api/rcon/commands", "/api/logs/files", "/api/logs/stream?source=docker", "/api/env", "/api/drift", "/api/maps", "/api/admins", "/api/players"]) {
+  for (const endpoint of ["/api/rcon/status", "/api/rcon/commands", "/api/logs/files", "/api/logs/stream?source=docker", "/api/env", "/api/drift", "/api/maps", "/api/admins", "/api/players", "/api/player-classes"]) {
     assert.equal((await fetch(baseUrl + endpoint)).status, 401);
   }
 
@@ -289,6 +295,26 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   const mutate = (route, body) => fetch(baseUrl + route, {
     method: "POST", headers: { "content-type": "application/json", cookie, "x-cs2ze-csrf": auth.csrfToken }, body: JSON.stringify(body),
   });
+  const mutateWith = (method, route, body) => fetch(baseUrl + route, {
+    method, headers: { "content-type": "application/json", cookie, "x-cs2ze-csrf": auth.csrfToken }, body: JSON.stringify(body),
+  });
+  const classesBefore = await (await get("/api/player-classes")).json();
+  assert.equal(classesBefore.presets.length, 20);
+  assert.equal(classesBefore.liveOutOfSync, false);
+  assert.equal(classesBefore.activation, "next_map");
+  const invalidClasses = structuredClone(classesBefore.classes);
+  invalidClasses.Human.RandomHuman.models[0].modelname = "../unsafe.vmdl";
+  assert.equal((await mutateWith("PUT", "/api/player-classes", { classes: invalidClasses })).status, 400);
+  const updatedClasses = structuredClone(classesBefore.classes);
+  updatedClasses.Human.RandomHuman.health = 101;
+  const classesSaved = await mutateWith("PUT", "/api/player-classes", { classes: updatedClasses });
+  assert.equal(classesSaved.status, 200);
+  assert.equal((await classesSaved.json()).write.liveSynced, true);
+  const sourceClasses = await fs.readFile(path.join(classConfigDir, "playerclass.jsonc"), "utf8");
+  const liveClasses = await fs.readFile(path.join(liveClassConfigDir, "playerclass.jsonc"), "utf8");
+  assert.equal(sourceClasses, liveClasses);
+  assert.ok((await fs.readdir(path.join(dataDir, "backups", "server-config__cs2fixes__zr__playerclass.jsonc"))).length >= 1);
+
   const mapsBefore = await (await get("/api/maps")).json();
   assert.equal(mapsBefore.maps[0].name, "ze_integration");
   assert.equal(mapsBefore.liveOutOfSync, false);
@@ -343,7 +369,9 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   assert.equal(audit.detail, null);
   assert.equal(database.prepare("SELECT COUNT(*) AS count FROM audit WHERE action = 'env.update'").get().count, 1);
   assert.equal(database.prepare("SELECT COUNT(*) AS count FROM audit WHERE action = 'env.reveal'").get().count, 1);
+  assert.equal(database.prepare("SELECT COUNT(*) AS count FROM audit WHERE action = 'playerclasses.update'").get().count, 1);
   database.prepare("UPDATE users SET role = 'operator' WHERE username = 'testowner'").run();
   assert.equal((await get("/api/rcon/commands")).status, 403);
+  assert.equal((await get("/api/player-classes")).status, 403);
   database.close();
 });

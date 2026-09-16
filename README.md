@@ -80,6 +80,8 @@ Useful entries:
   `joedwards32/cs2`.)
 - `MAM_CLIENT_EXTRA_ADDONS`: comma-separated client-only addon IDs.
 - `CS2FIXES_EXTRA_CFG`: semicolon-separated extra CS2Fixes/ZR cvar lines.
+- `ZE_FALL_DAMAGE_SCALE`: defaults to `0`, disabling fall damage. Set it to `1`
+  to restore the normal CS2 damage scale.
 - `ZE_BUY_TIME` and `ZE_BUY_ANYWHERE`: default to an effectively unlimited
   buy period from anywhere on the map.
 - `ZE_WEAPON_BUY_LIMIT`: `-1` allows unlimited purchases of non-grenade
@@ -98,7 +100,7 @@ panel or operator settings.
 - `server-config/cs2fixes/maplist.jsonc`: nomination and map-vote catalog.
 - `server-config/cs2fixes/cvar_whitelist.jsonc`: safe map cvars.
 - `server-config/cs2fixes/admins.jsonc`: harmless fallback when no owner ID is set.
-- `server-config/cs2fixes/zr/`: human/zombie classes, weapons, and hitgroups.
+- `server-config/cs2fixes/zr/`: human/zombie classes, model pools, weapons, and hitgroups.
 - `server-config/cs2fixes/maps/`: optional per-map CS2Fixes cfg files.
 - `server-config/stripper/`: optional per-map StripperCS2 files.
 
@@ -120,6 +122,12 @@ configuration cannot drift between rebuilds.
 
 Player chat commands include `!guns`, `!zclass`, `!flashlight` (or the flashlight
 key), `!nominate`, and `!rtv`. `!nom` is not a CS2Fixes command.
+
+Owners can manage `playerclass.jsonc` from the panel's **Classes** page. The
+default GFL preset provides randomized Human and Zombie pools plus an individual
+`!zclass` entry for every model in Workshop item `3160448201`. Saving makes an
+atomic backup and copies the file into the live game tree; it activates on the
+next map unless the owner explicitly confirms **Reload current map**.
 
 The Maps page validates `maplist.jsonc` before writing it. After a manual edit,
 watch `docker compose logs cs2-server` for `Failed parsing JSON` and use the
@@ -173,9 +181,9 @@ rsync -a --delete \
   ./ user@host:/path/to/cs2ze-docker/
 ```
 
-If `server-config/` and the copy in the game tree ever diverge, the panel's Maps
-and Admins pages flag it as out of sync and a save re-copies the runtime source
-over it.
+If `server-config/` and the copy in the game tree ever diverge, the panel's Maps,
+Admins, and Classes pages flag it as out of sync and a save re-copies the runtime
+source over it.
 
 This stack declares no Docker named volumes. `./cs2-data`, `./server-config`,
 and `./panel-data` are host bind mounts, so `docker compose down -v` cannot

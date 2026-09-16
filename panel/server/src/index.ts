@@ -17,6 +17,7 @@ import { registerMapRoutes } from "./routes/maps.js";
 import { registerAdminRoutes } from "./routes/admins.js";
 import { registerPlayerRoutes } from "./routes/players.js";
 import { registerWorkshopRoutes } from "./routes/workshop.js";
+import { registerPlayerClassRoutes } from "./routes/player-classes.js";
 import { closeDockerLogStream } from "./logs/docker-stream.js";
 import { closeGameLogStream } from "./logs/game-files.js";
 import { rcon } from "./rcon/client.js";
@@ -63,6 +64,7 @@ await registerMapRoutes(app);
 await registerAdminRoutes(app);
 await registerPlayerRoutes(app);
 await registerWorkshopRoutes(app);
+await registerPlayerClassRoutes(app);
 
 app.get("/api/health", async (): Promise<HealthResponse> => {
   const project = getProjectOrNull();

@@ -23,6 +23,8 @@ import type {
   MapsResponse,
   PlayerAction,
   PlayerActionResult,
+  PlayerClasses,
+  PlayerClassesResponse,
   WorkshopItem,
 } from "@cs2ze/shared";
 
@@ -111,4 +113,6 @@ export const api = {
   migrateEnvAdmin: () => request<AdminsResponse & { write: ConfigWriteResult }>("/api/admins/migrate-env-steamid", { method: "POST", body: JSON.stringify({ confirm: true }) }),
   players: () => request<RconStatusResponse>("/api/players"),
   playerAction: (id: string, action: PlayerAction, options: { reason?: string; durationMinutes?: number; amount?: number } = {}) => request<PlayerActionResult>(`/api/players/${encodeURIComponent(id)}/${action}`, { method: "POST", body: JSON.stringify({ action, ...options }) }),
+  playerClasses: () => request<PlayerClassesResponse>("/api/player-classes"),
+  putPlayerClasses: (classes: PlayerClasses) => request<PlayerClassesResponse & { write: ConfigWriteResult }>("/api/player-classes", { method: "PUT", body: JSON.stringify({ classes }) }),
 };

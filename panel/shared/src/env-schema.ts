@@ -124,6 +124,7 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "ZE_MAP_TIME_LIMIT", group: "gameplay", label: "Map time limit (min)", type: "number", default: "40", min: 0, max: 600, cvar: "mp_timelimit" },
   { key: "ZE_ROUND_TIME", group: "gameplay", label: "Round time (min)", type: "number", default: "60", min: 1, max: 600, cvar: "mp_roundtime" },
   { key: "ZE_FREEZE_TIME", group: "gameplay", label: "Freeze time (s)", type: "number", default: "5", min: 0, max: 120, cvar: "mp_freezetime" },
+  { key: "ZE_FALL_DAMAGE_SCALE", group: "gameplay", label: "Fall damage scale", description: "0 disables fall damage; 1 uses the normal CS2 damage scale.", type: "float", default: "0", min: 0, cvar: "sv_falldamage_scale" },
   { key: "ZE_BUY_TIME", group: "gameplay", label: "Buy time (s)", description: "Defaults to an effectively unlimited buy period for Zombie Escape.", type: "number", default: "9999999", min: 0, max: 2147483647, cvar: "mp_buytime" },
   { key: "ZE_BUY_ANYWHERE", group: "gameplay", label: "Buy anywhere", description: "Allow both teams to buy outside buy zones.", type: "boolean01", default: "1", cvar: "mp_buy_anywhere" },
   { key: "ZE_WEAPON_BUY_LIMIT", group: "gameplay", label: "Weapon purchases per round", description: "Maximum purchases of each non-grenade weapon per round. -1 means unlimited.", type: "number", default: "-1", min: -1, max: 9999, cvar: "mp_weapons_allow_typecount" },

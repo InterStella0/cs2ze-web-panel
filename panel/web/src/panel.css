@@ -162,6 +162,8 @@ input[inputmode="numeric"] { font-family: var(--font-mono); font-variant-ligatur
 .player-toolbar .unban-form { display: flex; gap: .5rem; }
 .player-toolbar .unban-form input { min-width: 220px; }
 .player-row { gap: 1rem; }
+.player-avatar { position: relative; flex: 0 0 auto; overflow: hidden; }
+.player-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .player-action > div { width: 8rem; }
 .action-dialog form { display: grid; gap: .85rem; }
 .action-dialog [data-slot="alert-dialog-footer"] { margin-top: .25rem; }

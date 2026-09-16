@@ -16,6 +16,11 @@ export const MANAGED_CONFIGS = {
     liveRel: "game/csgo/addons/cs2fixes/configs/admins.jsonc",
     containerPath: "/home/steam/cs2-dedicated/game/csgo/addons/cs2fixes/configs/admins.jsonc",
   },
+  playerClasses: {
+    source: "server-config/cs2fixes/zr/playerclass.jsonc",
+    liveRel: "game/csgo/addons/cs2fixes/configs/zr/playerclass.jsonc",
+    containerPath: "/home/steam/cs2-dedicated/game/csgo/addons/cs2fixes/configs/zr/playerclass.jsonc",
+  },
 } as const;
 
 export type ManagedConfigName = keyof typeof MANAGED_CONFIGS;

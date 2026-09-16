@@ -8,6 +8,7 @@ import {
   type PlayerAction,
 } from "@cs2ze/shared";
 import { audit } from "../db.js";
+import { getPlayerDbAvatar, isPlayerDbSteamId } from "../playerdb.js";
 import { rcon } from "../rcon/client.js";
 import { clearRconStatusCache, getRconStatus } from "../rcon/status.js";
 import { firstIssue, requireOperator } from "./access.js";
@@ -26,6 +27,21 @@ export async function registerPlayerRoutes(app: FastifyInstance): Promise<void> 
   app.get("/api/players", async (request, reply) => {
     if (!requireOperator(request, reply)) return;
     return getRconStatus(true);
+  });
+
+  app.get<{ Params: { steamid: string } }>("/api/players/:steamid/avatar", async (request, reply) => {
+    if (!requireOperator(request, reply)) return;
+    const steamid = request.params.steamid;
+    if (!isPlayerDbSteamId(steamid)) return reply.code(400).send({ error: "Invalid Steam ID" });
+
+    const avatarUrl = await getPlayerDbAvatar(steamid);
+    if (!avatarUrl) {
+      return reply.code(404).header("Cache-Control", "private, max-age=300").send({ error: "Player avatar not found" });
+    }
+    return reply.code(302)
+      .header("Cache-Control", "private, max-age=21600")
+      .header("Location", avatarUrl)
+      .send();
   });
 
   app.post<{ Params: { id: string; action: string } }>("/api/players/:id/:action", async (request, reply) => {

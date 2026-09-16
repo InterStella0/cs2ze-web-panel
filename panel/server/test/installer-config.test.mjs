@@ -18,6 +18,7 @@ test("installer uses current CS2 warmup controls", async () => {
   assert.match(installer, /append_gamemode_command mp_warmup_end/);
   assert.match(installer, /ensure_trailing_newline "\$file"/);
   assert.match(installer, /-e "s\/\$\{setting\}/);
+  assert.match(installer, /sv_falldamage_scale %s.*ZE_FALL_DAMAGE_SCALE:-0/);
   assert.match(installer, /mp_buytime %s.*ZE_BUY_TIME:-9999999/);
   assert.match(installer, /mp_buy_anywhere %s.*ZE_BUY_ANYWHERE:-1/);
   assert.match(installer, /mp_weapons_allow_typecount %s.*ZE_WEAPON_BUY_LIMIT:--1/);
