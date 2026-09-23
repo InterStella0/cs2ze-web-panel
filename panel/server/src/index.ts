@@ -18,9 +18,11 @@ import { registerAdminRoutes } from "./routes/admins.js";
 import { registerPlayerRoutes } from "./routes/players.js";
 import { registerWorkshopRoutes } from "./routes/workshop.js";
 import { registerPlayerClassRoutes } from "./routes/player-classes.js";
+import { registerPluginRoutes } from "./routes/plugins.js";
 import { closeDockerLogStream } from "./logs/docker-stream.js";
 import { closeGameLogStream } from "./logs/game-files.js";
 import { rcon } from "./rcon/client.js";
+import { startUpdateScheduler, stopUpdateScheduler } from "./plugins/service.js";
 
 process.umask(0o077);
 
@@ -65,6 +67,7 @@ await registerAdminRoutes(app);
 await registerPlayerRoutes(app);
 await registerWorkshopRoutes(app);
 await registerPlayerClassRoutes(app);
+await registerPluginRoutes(app);
 
 app.get("/api/health", async (): Promise<HealthResponse> => {
   const project = getProjectOrNull();
@@ -100,9 +103,11 @@ try {
 
 await runPreflight();
 await app.listen({ port: config.port, host: config.host });
+startUpdateScheduler();
 
 const shutdown = async (signal: string): Promise<void> => {
   app.log.info({ signal }, "Shutting down");
+  stopUpdateScheduler();
   closeDockerLogStream();
   closeGameLogStream();
   rcon.close();

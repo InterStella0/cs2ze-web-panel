@@ -58,6 +58,12 @@ export async function initDatabase(): Promise<void> {
       created_at TEXT NOT NULL
     ) STRICT;
 
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    ) STRICT;
+
     CREATE TABLE IF NOT EXISTS jobs (
       id TEXT PRIMARY KEY,
       kind TEXT NOT NULL CHECK (kind IN ('start', 'stop', 'restart', 'apply', 'pull')),
@@ -305,6 +311,23 @@ export function listJobs(limit = 50): Job[] {
     FROM jobs ORDER BY started_at DESC LIMIT ?
   `).all(safeLimit) as unknown as JobRow[];
   return rows.map(publicJob);
+}
+
+/**
+ * Panel-owned key/value settings. These belong in the panel database rather
+ * than .env because they configure the panel itself, and writing them must not
+ * mark the game-server container as needing a recreate.
+ */
+export function getSetting(key: string): string | null {
+  const row = db().prepare("SELECT value FROM settings WHERE key = ?").get(key) as unknown as { value: string } | undefined;
+  return row?.value ?? null;
+}
+
+export function setSetting(key: string, value: string): void {
+  db().prepare(`
+    INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+  `).run(key, value, new Date().toISOString());
 }
 
 export function closeDatabase(): void {

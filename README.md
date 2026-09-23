@@ -28,6 +28,8 @@ The included server is ready for Zombie Escape with:
   clearly marking changes that require a restart
 - Detect configuration drift and review pending changes before recreating the
   server
+- Track Metamod and plugin versions, detect new upstream releases, and update
+  them individually or automatically
 - Add individual Workshop maps or import maps from a Workshop collection
 - Edit the map rotation, groups, cooldowns, player limits, next map, and current
   map
@@ -205,6 +207,39 @@ The Classes page manages the ZombieReborn `playerclass.jsonc` file used by
 or randomized classes from every model in the GFL content pack. Saved classes
 load on the next map unless you explicitly reload the current map.
 
+### Plugins
+
+Plugins shows one card per component of the Metamod stack with four versions
+that are easy to confuse:
+
+- **Configured** is the version in `.env`, which is what the next boot installs.
+- **On disk** comes from the installer's own state markers under
+  `cs2-data/.cs2ze-mods/`, so it reflects what was actually downloaded.
+- **Loaded** is what the running server reports through `meta list`.
+- **Latest** is the newest release the panel has found upstream, from the GitHub
+  releases of each Source2ZE plugin and the AlliedMods file index for Metamod.
+
+Pick a release per plugin and save. The panel writes only the `*_VERSION` keys,
+so the change shows up as a normal pending restart that you apply when it suits
+you, or immediately with **Recreate the server after saving**.
+
+Two guards apply before anything is written, because `install-mods.sh` aborts
+the boot if a download fails or a version pairing is unsupported:
+
+- A version is only offered if the panel has seen that release upstream with an
+  archive whose name matches the URL the installer builds.
+- The resulting version set is checked against the compatibility rules in
+  [Version compatibility](#version-compatibility). Raising Metamod past build
+  1411 while CS2Fixes stays on v1.20.1 is refused, with the same message the
+  installer would print.
+
+The update checker polls upstream on a schedule (12 hours by default) and
+reports what is available. Automatic applying is opt-in, per plugin, and waits
+for an empty server unless you say otherwise; an update it cannot apply safely
+is reported on the page instead of forced through. A plugin pinned with a direct
+`*_URL` archive is reported but never version-managed, since the installer
+ignores its `*_VERSION` key.
+
 ### Settings, logs, and console
 
 Settings updates the existing `.env` without discarding its comments. Values
@@ -288,6 +323,10 @@ git pull --ff-only
 docker compose up -d --build
 ```
 
+Metamod and its plugins are updated from the panel's Plugins page rather than by
+editing `.env` by hand; see [Plugins](#plugins). The versions live in `.env`, so
+they survive a `git pull`.
+
 The server update check runs through SteamCMD when its container starts. To pull
 a newer configured base image, use **Pull image** followed by **Apply & Restart**,
 or run:
@@ -319,10 +358,17 @@ build:
 
 The defaults therefore use Metamod build 1411, CS2Fixes v1.20.1,
 MultiAddonManager v1.5.4, and StripperCS2 v1.1.3. Upgrade these components as a
-tested set rather than changing one version independently.
+tested set rather than changing one version independently. The Plugins page
+enforces exactly these rules before it writes a version, so a combination that
+cannot boot is refused there rather than at the next container start.
 
-Only switch `CS2FIXES_RUNTIME` and `MULTIADDONMANAGER_RUNTIME` from `steamrt3` to
-`steamrt4` when the base CS2 image uses a compatible Steam Runtime.
+Only switch `CS2FIXES_RUNTIME`, `MULTIADDONMANAGER_RUNTIME`, and
+`STRIPPERCS2_RUNTIME` from `steamrt3` to `steamrt4` when the base CS2 image uses
+a compatible Steam Runtime. These projects have also renamed their release
+assets over time, so the installer tries each known name for a version in turn
+and picks the archive format from the file extension; StripperCS2 v1.1.3 and
+earlier ship a single runtime-less `.zip`, while v1.1.4 and later ship a
+per-runtime `.tar.gz`.
 
 ## Security notes
 

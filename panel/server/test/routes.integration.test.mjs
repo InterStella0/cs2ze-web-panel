@@ -8,7 +8,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { PacketFramer, PacketType, encodePacket } from "../dist/rcon/protocol.js";
-import { buildGflPlayerClasses } from "../../shared/dist/index.js";
+import { DEFAULT_PLUGIN_UPDATE_SETTINGS, buildGflPlayerClasses } from "../../shared/dist/index.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../..");
@@ -165,7 +165,7 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   });
   await waitForHealth(baseUrl, () => output);
 
-  for (const endpoint of ["/api/rcon/status", "/api/rcon/commands", "/api/logs/files", "/api/logs/stream?source=docker", "/api/env", "/api/drift", "/api/maps", "/api/admins", "/api/players", "/api/player-classes"]) {
+  for (const endpoint of ["/api/rcon/status", "/api/rcon/commands", "/api/logs/files", "/api/logs/stream?source=docker", "/api/env", "/api/drift", "/api/maps", "/api/admins", "/api/players", "/api/player-classes", "/api/plugins"]) {
     assert.equal((await fetch(baseUrl + endpoint)).status, 401);
   }
 
@@ -355,6 +355,47 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   assert.equal(migrated.admins.find((item) => item.steamid === "76561190000000002").name, "Legacy Owner");
   assert.match(await fs.readFile(path.join(projectDir, ".env"), "utf8"), /^CS2_ADMIN_STEAMID=$/m);
   assert.ok((await fs.readdir(path.join(dataDir, "backups", "server-config__cs2fixes__admins.jsonc"))).length >= 1);
+
+  // install-mods.sh records what it actually downloaded; the panel reads those
+  // markers to tell "configured" apart from "on disk".
+  await fs.mkdir(path.join(cs2DataDir, ".cs2ze-mods"), { recursive: true });
+  await fs.writeFile(
+    path.join(cs2DataDir, ".cs2ze-mods", "cs2fixes.url"),
+    "https://github.com/Source2ZE/CS2Fixes/releases/download/v1.19.0/CS2Fixes-v1.19.0-steamrt3.tar.gz",
+  );
+  const pluginsResponse = await (await get("/api/plugins")).json();
+  assert.equal(pluginsResponse.plugins.length, 4);
+  const cs2fixesPlugin = pluginsResponse.plugins.find((item) => item.id === "cs2fixes");
+  assert.equal(cs2fixesPlugin.configuredVersion, "v1.20.1");
+  assert.equal(cs2fixesPlugin.installedVersion, "v1.19.0");
+  assert.equal(cs2fixesPlugin.pendingInstall, true);
+  assert.equal(cs2fixesPlugin.loadedVersion, "1.20.1");
+  // Nothing has been fetched from upstream in this test, so no version may be
+  // offered and no update may be claimed.
+  assert.equal(cs2fixesPlugin.latestVersion, null);
+  assert.equal(cs2fixesPlugin.updateAvailable, false);
+  assert.equal(pluginsResponse.plugins.find((item) => item.id === "metamod").installedVersion, null);
+  assert.equal(pluginsResponse.settings.autoApply, false);
+
+  // Fail-closed: a version the panel has not seen upstream is refused rather
+  // than written, because install-mods.sh aborts the boot on a 404.
+  const unseen = await mutate("/api/plugins/update", { selections: [{ id: "cs2fixes", version: "v9.9.9" }], apply: false });
+  assert.equal(unseen.status, 400);
+  assert.match((await unseen.json()).error, /not a release the panel has seen/);
+  assert.equal((await fetch(`${baseUrl}/api/plugins/update`, {
+    method: "POST", headers: { "content-type": "application/json", cookie },
+    body: JSON.stringify({ selections: [{ id: "cs2fixes", version: "v1.20.1" }], apply: false }),
+  })).status, 403);
+  assert.match(await fs.readFile(path.join(projectDir, ".env"), "utf8"), /^CS2FIXES_VERSION=v1\.20\.1$/m);
+
+  const savedUpdater = await mutateWith("PUT", "/api/plugins/settings", {
+    checkEnabled: true, checkIntervalHours: 6, autoApply: true,
+    autoApplyPlugins: ["cs2fixes"], applyWhenPlayersOnline: false, includePrereleases: false,
+  });
+  assert.equal(savedUpdater.status, 200);
+  assert.equal((await savedUpdater.json()).checkIntervalHours, 6);
+  assert.equal((await mutateWith("PUT", "/api/plugins/settings", { ...DEFAULT_PLUGIN_UPDATE_SETTINGS, checkIntervalHours: 0 })).status, 400);
+  assert.equal((await (await get("/api/plugins")).json()).settings.autoApplyPlugins[0], "cs2fixes");
 
   await fs.writeFile(path.join(projectDir, ".env"), writtenEnv.replace("METAMOD_VERSION=2.0.0-git1411", "METAMOD_VERSION=2.0.0-git1500"));
   const blockedApply = await fetch(`${baseUrl}/api/server/apply`, {

@@ -33,7 +33,17 @@ export function onJobUpdate(id: string, listener: (job: Job) => void): () => voi
 
 export { findJob as getJob, listJobs as getJobs };
 
-export function startLifecycleJob(kind: JobKind, user: SessionUser): Job {
+/**
+ * Who asked for a lifecycle operation. The automatic plugin updater has no
+ * session, so it supplies a display name with a null user rather than a fake
+ * row in `users`.
+ */
+export interface JobActor {
+  user: SessionUser | null;
+  name: string;
+}
+
+export function startLifecycleJob(kind: JobKind, actor: JobActor): Job {
   // Reserve the process-wide lock synchronously before returning to Fastify so
   // two requests in the same event-loop turn cannot both create running jobs.
   if (isLifecycleBusy()) throw new ComposeBusyError();
@@ -47,10 +57,10 @@ export function startLifecycleJob(kind: JobKind, user: SessionUser): Job {
     exitCode: null,
     command: describeComposeOperation(kind),
     output: "",
-    startedBy: user.username,
+    startedBy: actor.name,
   };
   insertJob(job);
-  audit(user, `server.${kind}`, job.id, job.command);
+  audit(actor.user, `server.${kind}`, job.id, job.command);
 
   let output = "";
   const operation = withLifecycleLock(async () => {
@@ -63,7 +73,7 @@ export function startLifecycleJob(kind: JobKind, user: SessionUser): Job {
     });
     const state = result.code === 0 ? "success" : "failed";
     finishJob(job.id, state, result.code, output);
-    audit(user, `server.${kind}.${state}`, job.id, `exitCode=${result.code}`);
+    audit(actor.user, `server.${kind}.${state}`, job.id, `exitCode=${result.code}`);
     publish(job.id);
   });
 
@@ -71,7 +81,7 @@ export function startLifecycleJob(kind: JobKind, user: SessionUser): Job {
     const message = error instanceof Error ? error.message : String(error);
     output = retainRecentOutput(output, `${output && !output.endsWith("\n") ? "\n" : ""}[panel] ${message}\n`);
     finishJob(job.id, "failed", -1, output);
-    audit(user, `server.${kind}.failed`, job.id, message);
+    audit(actor.user, `server.${kind}.failed`, job.id, message);
     publish(job.id);
   });
 

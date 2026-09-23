@@ -1,5 +1,6 @@
 export * from "./validators.js";
 export * from "./compat.js";
+export * from "./plugins.js";
 export * from "./env-schema.js";
 export * from "./env-validation.js";
 export * from "./maplist.js";

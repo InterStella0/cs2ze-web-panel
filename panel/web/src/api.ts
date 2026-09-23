@@ -25,6 +25,11 @@ import type {
   PlayerActionResult,
   PlayerClasses,
   PlayerClassesResponse,
+  AutoUpdateRun,
+  PluginId,
+  PluginsResponse,
+  PluginUpdateResult,
+  PluginUpdateSettings,
   WorkshopItem,
 } from "@cs2ze/shared";
 
@@ -113,6 +118,11 @@ export const api = {
   migrateEnvAdmin: () => request<AdminsResponse & { write: ConfigWriteResult }>("/api/admins/migrate-env-steamid", { method: "POST", body: JSON.stringify({ confirm: true }) }),
   players: () => request<RconStatusResponse>("/api/players"),
   playerAction: (id: string, action: PlayerAction, options: { reason?: string; durationMinutes?: number; amount?: number } = {}) => request<PlayerActionResult>(`/api/players/${encodeURIComponent(id)}/${action}`, { method: "POST", body: JSON.stringify({ action, ...options }) }),
+  plugins: () => request<PluginsResponse>("/api/plugins"),
+  checkPlugins: () => request<PluginsResponse>("/api/plugins/check", { method: "POST" }),
+  runPluginCheck: () => request<AutoUpdateRun>("/api/plugins/run-check", { method: "POST" }),
+  putPluginSettings: (settings: PluginUpdateSettings) => request<PluginUpdateSettings>("/api/plugins/settings", { method: "PUT", body: JSON.stringify(settings) }),
+  updatePlugins: (selections: Array<{ id: PluginId; version: string }>, apply: boolean) => request<PluginUpdateResult>("/api/plugins/update", { method: "POST", body: JSON.stringify({ selections, apply }) }),
   playerClasses: () => request<PlayerClassesResponse>("/api/player-classes"),
   putPlayerClasses: (classes: PlayerClasses) => request<PlayerClassesResponse & { write: ConfigWriteResult }>("/api/player-classes", { method: "PUT", body: JSON.stringify({ classes }) }),
 };

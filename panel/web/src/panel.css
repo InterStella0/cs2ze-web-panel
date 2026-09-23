@@ -200,3 +200,32 @@ input[inputmode="numeric"] { font-family: var(--font-mono); font-variant-ligatur
   .dashboard { padding: 1.15rem; }
   .settings-footer { left: 0; }
 }
+
+/* Plugins page: one card per component of the Metamod stack. */
+.plugins-page .mod-lastrun { margin-bottom: 1rem; }
+.mod-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.mod-card { gap: .85rem; }
+.mod-card.changed { border-color: color-mix(in srgb, var(--shadcn-primary) 55%, transparent); }
+.mod-badges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .35rem; }
+.mod-rows { display: grid; gap: .35rem; }
+.mod-row { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; font-size: .78rem; }
+.mod-row > span { color: var(--muted-foreground); }
+.mod-row > code { font-family: var(--font-mono); font-size: .75rem; }
+.mod-select { display: grid; gap: .35rem; font-size: .75rem; }
+.mod-error { display: flex; align-items: flex-start; gap: .45rem; color: var(--destructive); }
+.mod-error svg { width: 15px; flex: 0 0 auto; }
+.mod-foot { display: flex; align-items: center; justify-content: space-between; gap: .75rem; font-size: .7rem; }
+.mod-foot a { display: inline-flex; align-items: center; gap: .3rem; color: var(--muted-foreground); }
+.mod-foot a:hover { color: var(--foreground); }
+.mod-foot svg { width: 12px; height: 12px; }
+.mod-change { font-family: var(--font-mono); color: var(--shadcn-primary); font-weight: 600; }
+.mod-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem; margin-bottom: 1rem; }
+.mod-actions > label:first-child { margin-right: auto; }
+.mod-toggle { display: flex; align-items: center; gap: .65rem; }
+.mod-toggle strong { display: block; font-size: .8rem; }
+.mod-toggle small { display: block; margin-top: .1rem; color: var(--muted-foreground); font-size: .68rem; }
+.updater-card { gap: 1rem; margin-bottom: 1rem; }
+.updater-card .card-head > svg { width: 20px; color: var(--muted-foreground); }
+.mod-interval { display: grid; gap: .35rem; max-width: 12rem; font-size: .75rem; }
+.mod-auto-picks { display: grid; gap: .55rem; }
+.mod-checked { font-size: .7rem; }

@@ -25,6 +25,7 @@ import {
   Moon,
   Play,
   Power,
+  Puzzle,
   RefreshCw,
   RotateCcw,
   Save,
@@ -54,6 +55,7 @@ import {
 import { api, ApiError } from "./api.js";
 import { PlayerClassesContent } from "./classes.js";
 import { AdminsContent, MapsContent, PlayersContent } from "./management.js";
+import { PluginsContent } from "./plugins.js";
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert.js";
 import {
   AlertDialog,
@@ -204,6 +206,7 @@ const nav = [
   { icon: Users, label: "Players", to: "/players" },
   { icon: ShieldCheck, label: "Admins", to: "/admins" },
   { icon: Shirt, label: "Classes", to: "/classes", ownerOnly: true },
+  { icon: Puzzle, label: "Plugins", to: "/plugins" },
   { icon: Activity, label: "Logs", to: "/logs" },
   { icon: TerminalSquare, label: "Console", to: "/console", ownerOnly: true },
   { icon: Settings, label: "Settings", to: "/settings", ownerOnly: true },
@@ -796,6 +799,18 @@ function AdminsPage(): ReactNode {
   return <ManagementPage active="/admins"><AdminsContent /></ManagementPage>;
 }
 
+function PluginsPage(): ReactNode {
+  const me = useSessionRedirect();
+  if (me.isPending) return <div className="center"><div className="spinner" /></div>;
+  if (me.isError) return null;
+  if (me.data.user.mustChangePassword) return <ChangePassword username={me.data.user.username} />;
+  return <PanelShell me={me.data} active="/plugins">
+    <main className="dashboard management-page plugins-page">
+      <PluginsContent isOwner={me.data.user.role === "owner"} />
+    </main>
+  </PanelShell>;
+}
+
 function PlayerClassesPage(): ReactNode {
   const me = useSessionRedirect();
   if (me.isPending) return <div className="center"><div className="spinner" /></div>;
@@ -824,7 +839,8 @@ const mapsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/maps", 
 const playersRoute = createRoute({ getParentRoute: () => rootRoute, path: "/players", component: PlayersPage });
 const adminsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/admins", component: AdminsPage });
 const classesRoute = createRoute({ getParentRoute: () => rootRoute, path: "/classes", component: PlayerClassesPage });
-const routeTree = rootRoute.addChildren([indexRoute, loginRoute, logsRoute, consoleRoute, settingsRoute, mapsRoute, playersRoute, adminsRoute, classesRoute]);
+const pluginsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/plugins", component: PluginsPage });
+const routeTree = rootRoute.addChildren([indexRoute, loginRoute, logsRoute, consoleRoute, settingsRoute, mapsRoute, playersRoute, adminsRoute, classesRoute, pluginsRoute]);
 const router = createRouter({ routeTree, defaultPreload: "intent" });
 
 declare module "@tanstack/react-router" {

@@ -167,7 +167,7 @@ export async function registerServerRoutes(app: FastifyInstance): Promise<void> 
       }
       if (kind === "apply") await assertEnvCanBoot();
       try {
-        const job = startLifecycleJob(kind, auth.user);
+        const job = startLifecycleJob(kind, { user: auth.user, name: auth.user.username });
         return reply.code(202).send({ jobId: job.id });
       } catch (error) {
         if (error instanceof ComposeBusyError) {

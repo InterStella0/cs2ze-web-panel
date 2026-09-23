@@ -39,18 +39,35 @@
     done
   }
 
+  archive_format() {
+    case "$1" in
+      *.tar.gz|*.tgz) printf 'tar.gz' ;;
+      *.zip) printf 'zip' ;;
+      *) return 1 ;;
+    esac
+  }
+
+  # $2 is a newline-separated list of archive URLs for the requested version,
+  # newest naming convention first. Upstream has renamed release assets more than
+  # once (StripperCS2 v1.1.3 shipped StripperCS2-1.1.3.zip, v1.1.4 and later ship
+  # StripperCS2-<tag>-<runtime>.tar.gz), so the first name that downloads wins and
+  # the format follows the file extension.
   install_archive() {
     local name="$1"
-    local url="$2"
-    local format="$3"
-    shift 3
+    local candidates="$2"
+    shift 2
 
     local marker="$state_dir/${name}.url"
-    local temporary archive stage
+    local temporary archive stage candidate format resolved=""
 
-    if [ "$force_reinstall" != "1" ] && [ -f "$marker" ] && [ "$(cat "$marker")" = "$url" ]; then
-      log "$name is already installed"
-      return
+    if [ "$force_reinstall" != "1" ] && [ -f "$marker" ]; then
+      while IFS= read -r candidate; do
+        [ -n "$candidate" ] || continue
+        if [ "$(cat "$marker")" = "$candidate" ]; then
+          log "$name is already installed"
+          return
+        fi
+      done <<< "$candidates"
     fi
 
     temporary="$(mktemp -d)"
@@ -58,8 +75,27 @@
     stage="$temporary/stage"
     mkdir -p "$stage"
 
-    log "downloading $name"
-    wget --quiet --show-progress --progress=dot:giga -O "$archive" "$url"
+    while IFS= read -r candidate; do
+      [ -n "$candidate" ] || continue
+      log "downloading $name from $candidate"
+      if wget --quiet --show-progress --progress=dot:giga -O "$archive" "$candidate"; then
+        resolved="$candidate"
+        break
+      fi
+      log "$name is not published as $candidate"
+    done <<< "$candidates"
+
+    if [ -z "$resolved" ]; then
+      rm -rf -- "$temporary"
+      log "could not download $name from any known archive name"
+      return 1
+    fi
+
+    if ! format="$(archive_format "$resolved")"; then
+      rm -rf -- "$temporary"
+      log "unsupported archive format for $name: $resolved"
+      return 1
+    fi
 
     case "$format" in
       tar.gz)
@@ -68,15 +104,11 @@
       zip)
         unzip -q "$archive" -d "$stage"
         ;;
-      *)
-        log "unsupported archive format for $name: $format"
-        return 1
-        ;;
     esac
 
     preserve_existing_files "$stage" "$@"
     cp -a "$stage/." "$csgo_dir/"
-    printf '%s' "$url" > "$marker"
+    printf '%s' "$resolved" > "$marker"
     rm -rf -- "$temporary"
     log "installed $name"
   }
@@ -468,16 +500,22 @@
   }
 
   metamod_version="${METAMOD_VERSION:-2.0.0-git1411}"
-  metamod_url="${METAMOD_URL:-https://mms.alliedmods.net/mmsdrop/2.0/mmsource-${metamod_version}-linux.tar.gz}"
+  metamod_urls="${METAMOD_URL:-https://mms.alliedmods.net/mmsdrop/2.0/mmsource-${metamod_version}-linux.tar.gz}"
   cs2fixes_version="${CS2FIXES_VERSION:-v1.20.1}"
   cs2fixes_runtime="${CS2FIXES_RUNTIME:-steamrt3}"
-  cs2fixes_url="${CS2FIXES_URL:-https://github.com/Source2ZE/CS2Fixes/releases/download/${cs2fixes_version}/CS2Fixes-${cs2fixes_version}-${cs2fixes_runtime}.tar.gz}"
+  cs2fixes_urls="${CS2FIXES_URL:-$(printf '%s\n%s' \
+    "https://github.com/Source2ZE/CS2Fixes/releases/download/${cs2fixes_version}/CS2Fixes-${cs2fixes_version}-${cs2fixes_runtime}.tar.gz" \
+    "https://github.com/Source2ZE/CS2Fixes/releases/download/${cs2fixes_version}/CS2Fixes-${cs2fixes_version}-linux.tar.gz")}"
   mam_version="${MULTIADDONMANAGER_VERSION:-v1.5.4}"
   mam_runtime="${MULTIADDONMANAGER_RUNTIME:-steamrt3}"
-  mam_url="${MULTIADDONMANAGER_URL:-https://github.com/Source2ZE/MultiAddonManager/releases/download/${mam_version}/MultiAddonManager-${mam_version}-${mam_runtime}.tar.gz}"
+  mam_urls="${MULTIADDONMANAGER_URL:-$(printf '%s\n%s' \
+    "https://github.com/Source2ZE/MultiAddonManager/releases/download/${mam_version}/MultiAddonManager-${mam_version}-${mam_runtime}.tar.gz" \
+    "https://github.com/Source2ZE/MultiAddonManager/releases/download/${mam_version}/MultiAddonManager-${mam_version}-linux.tar.gz")}"
   stripper_version="${STRIPPERCS2_VERSION:-v1.1.3}"
-  stripper_asset_version="${stripper_version#v}"
-  stripper_url="${STRIPPERCS2_URL:-https://github.com/Source2ZE/StripperCS2/releases/download/${stripper_version}/StripperCS2-${stripper_asset_version}.zip}"
+  stripper_runtime="${STRIPPERCS2_RUNTIME:-steamrt3}"
+  stripper_urls="${STRIPPERCS2_URL:-$(printf '%s\n%s' \
+    "https://github.com/Source2ZE/StripperCS2/releases/download/${stripper_version}/StripperCS2-${stripper_version}-${stripper_runtime}.tar.gz" \
+    "https://github.com/Source2ZE/StripperCS2/releases/download/${stripper_version}/StripperCS2-${stripper_version#v}.zip")}"
 
   if enabled "${INSTALL_METAMOD:-1}"; then
     check_known_compatibility
@@ -487,28 +525,28 @@
   fi
 
   if enabled "${INSTALL_METAMOD:-1}"; then
-    install_archive metamod "$metamod_url" tar.gz "addons/metamod/metaplugins.ini"
+    install_archive metamod "$metamod_urls" "addons/metamod/metaplugins.ini"
     patch_gameinfo
   else
     unpatch_gameinfo
   fi
 
   if enabled "${INSTALL_CS2FIXES:-1}"; then
-    install_archive cs2fixes "$cs2fixes_url" tar.gz \
+    install_archive cs2fixes "$cs2fixes_urls" \
       "cfg/cs2fixes" "addons/cs2fixes/configs"
     configure_cs2fixes
   fi
   set_plugin_state "$csgo_dir/addons/metamod/cs2fixes.vdf" "${INSTALL_CS2FIXES:-1}"
 
   if enabled "${INSTALL_MULTIADDONMANAGER:-1}"; then
-    install_archive multiaddonmanager "$mam_url" tar.gz \
+    install_archive multiaddonmanager "$mam_urls" \
       "cfg/multiaddonmanager"
     configure_multiaddonmanager
   fi
   set_plugin_state "$csgo_dir/addons/metamod/multiaddonmanager.vdf" "${INSTALL_MULTIADDONMANAGER:-1}"
 
   if enabled "${INSTALL_STRIPPERCS2:-1}"; then
-    install_archive strippercs2 "$stripper_url" zip \
+    install_archive strippercs2 "$stripper_urls" \
       "addons/StripperCS2/maps"
   fi
   set_plugin_state "$csgo_dir/addons/metamod/StripperCS2.vdf" "${INSTALL_STRIPPERCS2:-1}"
