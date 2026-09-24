@@ -89,7 +89,7 @@ export const PLUGIN_SPECS: readonly PluginSpec[] = [
     versionKey: "STRIPPERCS2_VERSION",
     urlKey: "STRIPPERCS2_URL",
     runtimeKey: "STRIPPERCS2_RUNTIME",
-    defaultVersion: "v1.1.3",
+    defaultVersion: "v1.1.4",
     defaultRuntime: "steamrt3",
   },
 ];

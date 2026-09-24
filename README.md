@@ -349,18 +349,20 @@ rsync -a --delete \
 ## Version compatibility
 
 The plugin versions in `.env.example` are pinned as a compatible set. As of
-2026-09-15, the latest upstream releases do not all support the same Metamod
-build:
+2026-09-24, upstream has split into two lanes that do not share a Metamod build:
 
 - CS2Fixes v1.20.1 requires Metamod 2.0 build 1411 or earlier.
-- MultiAddonManager v1.6 requires a build newer than 1459.
-- StripperCS2 v2.0 requires build 1461 or later.
+- MultiAddonManager v1.6 and later require a build newer than 1459.
+- StripperCS2 v2.0 and later require build 1461 or later.
 
-The defaults therefore use Metamod build 1411, CS2Fixes v1.20.1,
-MultiAddonManager v1.5.4, and StripperCS2 v1.1.3. Upgrade these components as a
-tested set rather than changing one version independently. The Plugins page
-enforces exactly these rules before it writes a version, so a combination that
-cannot boot is refused there rather than at the next container start.
+Because CS2Fixes pins the ceiling at build 1411, the whole stack stays on the
+pre-KHook lane. The defaults therefore use Metamod build 1411, CS2Fixes v1.20.1,
+MultiAddonManager v1.5.4, and StripperCS2 v1.1.4. StripperCS2 v1.1.4 is the
+backport that carries the 2026-09-22 lump data offset without moving off build
+1411. Upgrade these components as a tested set rather than changing one version
+independently. The Plugins page enforces exactly these rules before it writes a
+version, so a combination that cannot boot is refused there rather than at the
+next container start.
 
 Only switch `CS2FIXES_RUNTIME`, `MULTIADDONMANAGER_RUNTIME`, and
 `STRIPPERCS2_RUNTIME` from `steamrt3` to `steamrt4` when the base CS2 image uses

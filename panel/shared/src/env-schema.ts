@@ -220,7 +220,7 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "MULTIADDONMANAGER_RUNTIME", group: "mods", label: "MultiAddonManager runtime", type: "select", options: ["steamrt3", "steamrt4"], default: "steamrt3", restartRequired: true, advanced: true },
   { key: "MULTIADDONMANAGER_URL", group: "mods", label: "MultiAddonManager URL override", type: "string", default: "", restartRequired: true, advanced: true },
   { key: "INSTALL_STRIPPERCS2", group: "mods", label: "Install StripperCS2", type: "boolean01", default: "1", restartRequired: true },
-  { key: "STRIPPERCS2_VERSION", group: "mods", label: "StripperCS2 version", type: "string", default: "v1.1.3", restartRequired: true },
+  { key: "STRIPPERCS2_VERSION", group: "mods", label: "StripperCS2 version", type: "string", default: "v1.1.4", restartRequired: true },
   { key: "STRIPPERCS2_RUNTIME", group: "mods", label: "StripperCS2 runtime", description: "Only used by releases from v1.1.4 onward; earlier releases ship a single runtime-less archive.", type: "select", options: ["steamrt3", "steamrt4"], default: "steamrt3", restartRequired: true, advanced: true },
   { key: "STRIPPERCS2_URL", group: "mods", label: "StripperCS2 URL override", type: "string", default: "", restartRequired: true, advanced: true },
   { key: "MODS_FORCE_REINSTALL", group: "mods", label: "Force re-download on next start", description: "Set to 1 for one start to download all enabled mod archives again, then set it back to 0.", type: "boolean01", default: "0", restartRequired: true },

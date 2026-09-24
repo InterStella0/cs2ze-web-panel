@@ -511,7 +511,7 @@
   mam_urls="${MULTIADDONMANAGER_URL:-$(printf '%s\n%s' \
     "https://github.com/Source2ZE/MultiAddonManager/releases/download/${mam_version}/MultiAddonManager-${mam_version}-${mam_runtime}.tar.gz" \
     "https://github.com/Source2ZE/MultiAddonManager/releases/download/${mam_version}/MultiAddonManager-${mam_version}-linux.tar.gz")}"
-  stripper_version="${STRIPPERCS2_VERSION:-v1.1.3}"
+  stripper_version="${STRIPPERCS2_VERSION:-v1.1.4}"
   stripper_runtime="${STRIPPERCS2_RUNTIME:-steamrt3}"
   stripper_urls="${STRIPPERCS2_URL:-$(printf '%s\n%s' \
     "https://github.com/Source2ZE/StripperCS2/releases/download/${stripper_version}/StripperCS2-${stripper_version}-${stripper_runtime}.tar.gz" \

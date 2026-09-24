@@ -71,7 +71,7 @@ export function checkCompatibility(env: CompatInput): CompatFinding[] {
 
   const cs2fixesVersion = env.CS2FIXES_VERSION ?? "v1.20.1";
   const mamVersion = env.MULTIADDONMANAGER_VERSION ?? "v1.5.4";
-  const stripperVersion = env.STRIPPERCS2_VERSION ?? "v1.1.3";
+  const stripperVersion = env.STRIPPERCS2_VERSION ?? "v1.1.4";
 
   if (cs2fixesEnabled && cs2fixesVersion === "v1.20.1" && build > 1411) {
     findings.push({
