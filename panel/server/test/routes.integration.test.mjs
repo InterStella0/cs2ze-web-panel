@@ -328,10 +328,12 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   assert.match(sourceMaps, /ze_workshop_test/);
   assert.ok((await fs.readdir(path.join(dataDir, "backups", "server-config__cs2fixes__maplist.jsonc"))).length >= 1);
   assert.equal((await mutate("/api/maps/next", { map: "ze_workshop_test" })).status, 200);
-  assert.equal((await mutate("/api/maps/current", { map: "ze_workshop_test", confirmMapChange: true })).status, 200);
+  assert.equal((await mutate("/api/maps/current", { map: "ze_local_test", confirmMapChange: true })).status, 200);
+  assert.equal((await mutate("/api/maps/current", { workshopId: 456, confirmMapChange: true })).status, 200);
   assert.equal((await mutate("/api/maps/reload", { confirmMapRestart: true })).status, 200);
   assert.ok(rcon.commands.includes("c_setnextmap ze_workshop_test"));
-  assert.ok(rcon.commands.includes("c_map ze_workshop_test"));
+  assert.ok(rcon.commands.includes("c_map ze_local_test"));
+  assert.ok(rcon.commands.includes("c_map 456"));
   assert.ok(rcon.commands.includes("c_reload_map_list"));
 
   const adminAdded = await mutate("/api/admins", { steamid: "76561190000000001", name: "Route Admin", flags: "bc", immunity: 10, groups: [] });

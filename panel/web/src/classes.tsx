@@ -90,7 +90,7 @@ export function PlayerClassesContent(): ReactNode {
   const reload = useMutation({ mutationFn: async () => {
     const map = status.data?.game?.currentMap;
     if (!map) throw new Error("The current map is unavailable");
-    return api.changeMap(map);
+    return api.changeMap({ map });
   } });
 
   if (classes.error) return <p className="form-error" role="alert">{classes.error.message}</p>;

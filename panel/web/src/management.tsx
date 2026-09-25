@@ -120,7 +120,7 @@ export function MapsContent(): ReactNode {
       <div className="inline-form"><Input placeholder="Group name" value={groupName} onChange={(event) => setGroupName(event.target.value)} /><Input type="number" min="0" step="0.5" placeholder="Cooldown hours" value={groupCooldown} onChange={(event) => setGroupCooldown(event.target.value)} /><Button variant="outline" onClick={addGroup}>Add group</Button></div>
     </Card>
     <section className="management-list">
-      {maps.isPending ? <div className="center"><div className="spinner" /></div> : maps.data?.maps.map((map) => <MapRow key={map.name} map={map} groups={maps.data.groups} current={maps.data.currentMap === map.name} onChanged={refresh} onChangeNow={() => change.mutate(map.name)} />)}
+      {maps.isPending ? <div className="center"><div className="spinner" /></div> : maps.data?.maps.map((map) => <MapRow key={map.name} map={map} groups={maps.data.groups} current={maps.data.currentMap === map.name} onChanged={refresh} onChangeNow={() => change.mutate(map.workshop_id === undefined ? { map: map.name } : { workshopId: map.workshop_id })} />)}
       {!maps.isPending && !maps.data?.maps.length && <div className="panel-card empty-state">No maps configured yet.</div>}
     </section>
     <ErrorLine error={maps.error ?? busyError} />

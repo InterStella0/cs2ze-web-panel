@@ -41,6 +41,10 @@ export class ApiError extends Error {
   }
 }
 
+export type ChangeMapTarget =
+  | { map: string; workshopId?: never }
+  | { map?: never; workshopId: string | number };
+
 async function request<T>(url: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (init.body) headers.set("Content-Type", "application/json");
@@ -105,7 +109,7 @@ export const api = {
   deleteMap: (name: string) => request<MapsResponse & { write: ConfigWriteResult }>(`/api/maps/${encodeURIComponent(name)}`, { method: "DELETE" }),
   putMapGroups: (groups: Record<string, MapGroup>) => request<MapsResponse & { write: ConfigWriteResult }>("/api/maps/groups", { method: "PUT", body: JSON.stringify(groups) }),
   reloadMaps: () => request<{ output: string; executedAt: string }>("/api/maps/reload", { method: "POST", body: JSON.stringify({ confirmMapRestart: true }) }),
-  changeMap: (map: string) => request<{ output: string; executedAt: string }>("/api/maps/current", { method: "POST", body: JSON.stringify({ map, confirmMapChange: true }) }),
+  changeMap: (target: ChangeMapTarget) => request<{ output: string; executedAt: string }>("/api/maps/current", { method: "POST", body: JSON.stringify({ ...target, confirmMapChange: true }) }),
   setNextMap: (map: string | null) => request<{ output: string; executedAt: string }>("/api/maps/next", { method: "POST", body: JSON.stringify({ map }) }),
   workshopItem: (id: string) => request<WorkshopItem>(`/api/workshop/${encodeURIComponent(id)}`),
   workshopCollection: (id: string) => request<{ id: string; items: WorkshopItem[] }>(`/api/workshop/collection/${encodeURIComponent(id)}`),
