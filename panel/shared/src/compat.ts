@@ -21,10 +21,12 @@ export interface CompatInput {
   CS2FIXES_VERSION?: string;
   MULTIADDONMANAGER_VERSION?: string;
   STRIPPERCS2_VERSION?: string;
+  SERVERLISTPLAYERSFIX_VERSION?: string;
   INSTALL_METAMOD?: string;
   INSTALL_CS2FIXES?: string;
   INSTALL_MULTIADDONMANAGER?: string;
   INSTALL_STRIPPERCS2?: string;
+  INSTALL_SERVERLISTPLAYERSFIX?: string;
 }
 
 const enabled = (v: string | undefined, fallback = "1"): boolean => (v ?? fallback) === "1";
@@ -42,14 +44,15 @@ export function checkCompatibility(env: CompatInput): CompatFinding[] {
   const cs2fixesEnabled = enabled(env.INSTALL_CS2FIXES);
   const mamEnabled = enabled(env.INSTALL_MULTIADDONMANAGER);
   const stripperEnabled = enabled(env.INSTALL_STRIPPERCS2);
+  const slpfEnabled = enabled(env.INSTALL_SERVERLISTPLAYERSFIX);
 
   // install-mods.sh: Metamod disabled while a Metamod plugin is enabled -> exit 1.
   if (!metamodEnabled) {
-    if (cs2fixesEnabled || mamEnabled || stripperEnabled) {
+    if (cs2fixesEnabled || mamEnabled || stripperEnabled || slpfEnabled) {
       findings.push({
         severity: "error",
         message: "Metamod cannot be disabled while a Metamod plugin is enabled",
-        keys: ["INSTALL_METAMOD", "INSTALL_CS2FIXES", "INSTALL_MULTIADDONMANAGER", "INSTALL_STRIPPERCS2"],
+        keys: ["INSTALL_METAMOD", "INSTALL_CS2FIXES", "INSTALL_MULTIADDONMANAGER", "INSTALL_STRIPPERCS2", "INSTALL_SERVERLISTPLAYERSFIX"],
       });
     }
     // check_known_compatibility only runs when Metamod is enabled.
@@ -72,6 +75,7 @@ export function checkCompatibility(env: CompatInput): CompatFinding[] {
   const cs2fixesVersion = env.CS2FIXES_VERSION ?? "v1.20.1";
   const mamVersion = env.MULTIADDONMANAGER_VERSION ?? "v1.5.4";
   const stripperVersion = env.STRIPPERCS2_VERSION ?? "v1.1.4";
+  const slpfVersion = env.SERVERLISTPLAYERSFIX_VERSION ?? "v1.0.8";
 
   if (cs2fixesEnabled && cs2fixesVersion === "v1.20.1" && build > 1411) {
     findings.push({
@@ -92,6 +96,13 @@ export function checkCompatibility(env: CompatInput): CompatFinding[] {
       severity: "error",
       message: "StripperCS2 v2.0 requires Metamod build 1461 or later",
       keys: ["METAMOD_VERSION", "STRIPPERCS2_VERSION"],
+    });
+  }
+  if (slpfEnabled && slpfVersion === "v2.0" && build < 1461) {
+    findings.push({
+      severity: "error",
+      message: "ServerListPlayersFix v2.0 requires Metamod build 1461 or later",
+      keys: ["METAMOD_VERSION", "SERVERLISTPLAYERSFIX_VERSION"],
     });
   }
 

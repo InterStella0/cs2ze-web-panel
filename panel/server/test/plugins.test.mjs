@@ -49,7 +49,7 @@ test("download URLs reproduce exactly what install-mods.sh would fetch", async (
   const end = lines.findIndex((line, index) => index > start && /^\s*$/.test(line));
   const assignments = lines.slice(start, end).join("\n");
   assert.ok(assignments.includes("metamod_urls="), "installer URL block not found");
-  assert.ok(assignments.includes("stripper_urls="), "installer URL block is truncated");
+  assert.ok(assignments.includes("slpf_urls="), "installer URL block is truncated");
 
   const cases = [
     { id: "metamod", version: "2.0.0-git1461", env: { METAMOD_VERSION: "2.0.0-git1461" }, variable: "metamod_urls" },
@@ -57,6 +57,8 @@ test("download URLs reproduce exactly what install-mods.sh would fetch", async (
     { id: "multiaddonmanager", version: "v1.6", env: { MULTIADDONMANAGER_VERSION: "v1.6" }, variable: "mam_urls" },
     { id: "strippercs2", version: "v1.1.3", env: { STRIPPERCS2_VERSION: "v1.1.3" }, variable: "stripper_urls" },
     { id: "strippercs2", version: "v2.0.1", env: { STRIPPERCS2_VERSION: "v2.0.1" }, variable: "stripper_urls" },
+    { id: "serverlistplayersfix", version: "v1.0.8", env: { SERVERLISTPLAYERSFIX_VERSION: "v1.0.8" }, variable: "slpf_urls" },
+    { id: "serverlistplayersfix", version: "v2.0", runtime: "steamrt4", env: { SERVERLISTPLAYERSFIX_VERSION: "v2.0", SERVERLISTPLAYERSFIX_RUNTIME: "steamrt4" }, variable: "slpf_urls" },
   ];
   for (const testCase of cases) {
     const script = `set -eu\n${assignments}\nprintf '%s' "$${testCase.variable}"\n`;
@@ -135,6 +137,12 @@ test("a selection that cannot boot is rejected by the same rules as the installe
       .filter((finding) => finding.severity === "error").length,
     0,
   );
+
+  // ServerListPlayersFix v2.0 moved to KHook and needs the newer Metamod lane.
+  assert.ok(checkCompatibility({ METAMOD_VERSION: "2.0.0-git1411", SERVERLISTPLAYERSFIX_VERSION: "v2.0" })
+    .some((finding) => finding.severity === "error" && finding.keys.includes("SERVERLISTPLAYERSFIX_VERSION")));
+  assert.ok(checkCompatibility({ METAMOD_VERSION: "2.0.0-git1411", INSTALL_CS2FIXES: "0", INSTALL_MULTIADDONMANAGER: "0", INSTALL_STRIPPERCS2: "0", INSTALL_METAMOD: "0" })
+    .some((finding) => finding.message.includes("Metamod cannot be disabled")), "ServerListPlayersFix alone still needs Metamod");
 });
 
 test("version strings that could corrupt .env are refused", () => {

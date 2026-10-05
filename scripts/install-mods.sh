@@ -193,6 +193,10 @@
       log "StripperCS2 v2.0 requires Metamod build 1461 or later"
       return 1
     fi
+    if enabled "${INSTALL_SERVERLISTPLAYERSFIX:-1}" && [ "$slpf_version" = "v2.0" ] && [ "$build" -lt 1461 ]; then
+      log "ServerListPlayersFix v2.0 requires Metamod build 1461 or later"
+      return 1
+    fi
   }
 
   remove_managed_block() {
@@ -516,10 +520,16 @@
   stripper_urls="${STRIPPERCS2_URL:-$(printf '%s\n%s' \
     "https://github.com/Source2ZE/StripperCS2/releases/download/${stripper_version}/StripperCS2-${stripper_version}-${stripper_runtime}.tar.gz" \
     "https://github.com/Source2ZE/StripperCS2/releases/download/${stripper_version}/StripperCS2-${stripper_version#v}.zip")}"
+  slpf_version="${SERVERLISTPLAYERSFIX_VERSION:-v1.0.8}"
+  slpf_runtime="${SERVERLISTPLAYERSFIX_RUNTIME:-steamrt3}"
+  slpf_urls="${SERVERLISTPLAYERSFIX_URL:-$(printf '%s\n%s' \
+    "https://github.com/Source2ZE/ServerListPlayersFix/releases/download/${slpf_version}/ServerListPlayersFix-${slpf_version}-${slpf_runtime}.tar.gz" \
+    "https://github.com/Source2ZE/ServerListPlayersFix/releases/download/${slpf_version}/ServerListPlayersFix-${slpf_version}-linux.tar.gz")}"
 
   if enabled "${INSTALL_METAMOD:-1}"; then
     check_known_compatibility
-  elif enabled "${INSTALL_CS2FIXES:-1}" || enabled "${INSTALL_MULTIADDONMANAGER:-1}" || enabled "${INSTALL_STRIPPERCS2:-1}"; then
+  elif enabled "${INSTALL_CS2FIXES:-1}" || enabled "${INSTALL_MULTIADDONMANAGER:-1}" || enabled "${INSTALL_STRIPPERCS2:-1}" \
+    || enabled "${INSTALL_SERVERLISTPLAYERSFIX:-1}"; then
     log "Metamod cannot be disabled while a Metamod plugin is enabled"
     exit 1
   fi
@@ -550,6 +560,11 @@
       "addons/StripperCS2/maps"
   fi
   set_plugin_state "$csgo_dir/addons/metamod/StripperCS2.vdf" "${INSTALL_STRIPPERCS2:-1}"
+
+  if enabled "${INSTALL_SERVERLISTPLAYERSFIX:-1}"; then
+    install_archive serverlistplayersfix "$slpf_urls"
+  fi
+  set_plugin_state "$csgo_dir/addons/metamod/serverlistplayersfix_mm.vdf" "${INSTALL_SERVERLISTPLAYERSFIX:-1}"
 
   configure_gamemode_rules
 

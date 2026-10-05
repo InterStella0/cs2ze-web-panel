@@ -16,6 +16,8 @@ The included server is ready for Zombie Escape with:
 - [CS2Fixes](https://github.com/Source2ZE/CS2Fixes) and ZombieReborn
 - [MultiAddonManager](https://github.com/Source2ZE/MultiAddonManager)
 - [StripperCS2](https://github.com/Source2ZE/StripperCS2)
+- [ServerListPlayersFix](https://github.com/Source2ZE/ServerListPlayersFix), so
+  connected players show up in the Steam server browser
 - A starter map rotation, ZE gameplay settings, nominations, RTV, voting,
   weapons, knockback, flashlights, and player classes
 
@@ -62,10 +64,12 @@ The included server is ready for Zombie Escape with:
           CS2Fixes["CS2Fixes<br/>ZombieReborn"]
           MAM["MultiAddonManager"]
           Stripper["StripperCS2"]
+          SLPF["ServerListPlayersFix"]
 
           Metamod --> CS2Fixes
           Metamod --> MAM
           Metamod --> Stripper
+          Metamod --> SLPF
       end
 
       Browser --> Panel
@@ -354,18 +358,21 @@ The plugin versions in `.env.example` are pinned as a compatible set. As of
 - CS2Fixes v1.20.1 requires Metamod 2.0 build 1411 or earlier.
 - MultiAddonManager v1.6 and later require a build newer than 1459.
 - StripperCS2 v2.0 and later require build 1461 or later.
+- ServerListPlayersFix v2.0 and later require build 1461 or later.
 
 Because CS2Fixes pins the ceiling at build 1411, the whole stack stays on the
 pre-KHook lane. The defaults therefore use Metamod build 1411, CS2Fixes v1.20.1,
-MultiAddonManager v1.5.4, and StripperCS2 v1.1.4. StripperCS2 v1.1.4 is the
+MultiAddonManager v1.5.4, StripperCS2 v1.1.4, and ServerListPlayersFix v1.0.8.
+StripperCS2 v1.1.4 is the
 backport that carries the 2026-09-22 lump data offset without moving off build
 1411. Upgrade these components as a tested set rather than changing one version
 independently. The Plugins page enforces exactly these rules before it writes a
 version, so a combination that cannot boot is refused there rather than at the
 next container start.
 
-Only switch `CS2FIXES_RUNTIME`, `MULTIADDONMANAGER_RUNTIME`, and
-`STRIPPERCS2_RUNTIME` from `steamrt3` to `steamrt4` when the base CS2 image uses
+Only switch `CS2FIXES_RUNTIME`, `MULTIADDONMANAGER_RUNTIME`,
+`STRIPPERCS2_RUNTIME`, and `SERVERLISTPLAYERSFIX_RUNTIME` from `steamrt3` to
+`steamrt4` when the base CS2 image uses
 a compatible Steam Runtime. These projects have also renamed their release
 assets over time, so the installer tries each known name for a version in turn
 and picks the archive format from the file extension; StripperCS2 v1.1.3 and

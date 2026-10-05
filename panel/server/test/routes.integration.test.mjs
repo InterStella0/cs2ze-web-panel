@@ -35,7 +35,7 @@ async function startRcon() {
     c_timeleft: "[CS2Fixes] Timeleft: 12:34",
     c_nextmap: "Next map is: ze_next",
     c_who: "Admin #12 76561190000000000",
-    "meta list": "[01] CS2Fixes (1.20.1) by Vauff\n[02] StripperCS2 (1.1.3) by Vauff\n[03] MultiAddonManager (1.5.4) by Source2ZE",
+    "meta list": "[01] CS2Fixes (1.20.1) by Vauff\n[02] StripperCS2 (1.1.3) by Vauff\n[03] MultiAddonManager (1.5.4) by Source2ZE\n[04] ServerListPlayersFix (1.0.8) by Poggu",
     cvarlist: cvars,
   };
   const server = net.createServer((socket) => {
@@ -193,12 +193,12 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   assert.equal(status.game.nextMap, "ze_next");
   assert.equal(status.players[0].name, "Route Player");
   assert.equal(status.players[0].isAdmin, true);
-  assert.equal(status.plugins.length, 3);
+  assert.equal(status.plugins.length, 4);
 
   const serverStatus = await (await get("/api/server/status")).json();
   assert.equal(serverStatus.rcon.connected, true);
   assert.equal(serverStatus.game.currentMap, "ze_integration");
-  assert.equal(serverStatus.plugins.length, 3);
+  assert.equal(serverStatus.plugins.length, 4);
 
   const commands = await (await get("/api/rcon/commands")).json();
   assert.equal(commands.commands.length, 1_200);
@@ -366,7 +366,7 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
     "https://github.com/Source2ZE/CS2Fixes/releases/download/v1.19.0/CS2Fixes-v1.19.0-steamrt3.tar.gz",
   );
   const pluginsResponse = await (await get("/api/plugins")).json();
-  assert.equal(pluginsResponse.plugins.length, 4);
+  assert.equal(pluginsResponse.plugins.length, 5);
   const cs2fixesPlugin = pluginsResponse.plugins.find((item) => item.id === "cs2fixes");
   assert.equal(cs2fixesPlugin.configuredVersion, "v1.20.1");
   assert.equal(cs2fixesPlugin.installedVersion, "v1.19.0");
@@ -377,6 +377,7 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   assert.equal(cs2fixesPlugin.latestVersion, null);
   assert.equal(cs2fixesPlugin.updateAvailable, false);
   assert.equal(pluginsResponse.plugins.find((item) => item.id === "metamod").installedVersion, null);
+  assert.equal(pluginsResponse.plugins.find((item) => item.id === "serverlistplayersfix").loadedVersion, "1.0.8");
   assert.equal(pluginsResponse.settings.autoApply, false);
 
   // Fail-closed: a version the panel has not seen upstream is refused rather

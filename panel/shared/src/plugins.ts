@@ -10,9 +10,9 @@ import { z } from "zod";
  * tag that "looks right" would leave the server unable to start.
  */
 
-export type PluginId = "metamod" | "cs2fixes" | "multiaddonmanager" | "strippercs2";
+export type PluginId = "metamod" | "cs2fixes" | "multiaddonmanager" | "strippercs2" | "serverlistplayersfix";
 
-export const pluginId = z.enum(["metamod", "cs2fixes", "multiaddonmanager", "strippercs2"]);
+export const pluginId = z.enum(["metamod", "cs2fixes", "multiaddonmanager", "strippercs2", "serverlistplayersfix"]);
 
 export type PluginSource =
   | { kind: "github"; owner: string; repo: string }
@@ -90,6 +90,20 @@ export const PLUGIN_SPECS: readonly PluginSpec[] = [
     urlKey: "STRIPPERCS2_URL",
     runtimeKey: "STRIPPERCS2_RUNTIME",
     defaultVersion: "v1.1.4",
+    defaultRuntime: "steamrt3",
+  },
+  {
+    id: "serverlistplayersfix",
+    name: "ServerListPlayersFix",
+    homepage: "https://github.com/Source2ZE/ServerListPlayersFix",
+    source: { kind: "github", owner: "Source2ZE", repo: "ServerListPlayersFix" },
+    marker: "serverlistplayersfix",
+    rconName: "ServerListPlayersFix",
+    installKey: "INSTALL_SERVERLISTPLAYERSFIX",
+    versionKey: "SERVERLISTPLAYERSFIX_VERSION",
+    urlKey: "SERVERLISTPLAYERSFIX_URL",
+    runtimeKey: "SERVERLISTPLAYERSFIX_RUNTIME",
+    defaultVersion: "v1.0.8",
     defaultRuntime: "steamrt3",
   },
 ];
@@ -179,6 +193,11 @@ export function buildDownloadCandidates(spec: PluginSpec, version: string, runti
         release("StripperCS2", `StripperCS2-${version}-${effectiveRuntime}.tar.gz`),
         // v1.1.3 and earlier: no runtime in the name, and the "v" is dropped.
         release("StripperCS2", `StripperCS2-${version.replace(/^v/, "")}.zip`),
+      ];
+    case "serverlistplayersfix":
+      return [
+        release("ServerListPlayersFix", `ServerListPlayersFix-${version}-${effectiveRuntime}.tar.gz`),
+        release("ServerListPlayersFix", `ServerListPlayersFix-${version}-linux.tar.gz`),
       ];
   }
 }

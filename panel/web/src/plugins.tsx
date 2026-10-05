@@ -137,7 +137,7 @@ function UpdaterSettings({ current, onSaved }: { current: PluginUpdateSettings; 
       <div className="mod-auto-picks">
         <p className="hint">Only these plugins are updated automatically. Anything left unchecked is reported and waits for you.</p>
         <div className="chip-list">
-          {(["metamod", "cs2fixes", "multiaddonmanager", "strippercs2"] as PluginId[]).map((id) => <Label className="select-chip" key={id}>
+          {(["metamod", "cs2fixes", "multiaddonmanager", "strippercs2", "serverlistplayersfix"] as PluginId[]).map((id) => <Label className="select-chip" key={id}>
             <Checkbox checked={draft.autoApplyPlugins.includes(id)} onCheckedChange={(on) => toggle(id, on === true)} />
             {id}
           </Label>)}
