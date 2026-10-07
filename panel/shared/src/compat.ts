@@ -8,6 +8,8 @@
  * verbatim so they can be grepped against the container logs.
  */
 
+import { compareVersions } from "./plugins.js";
+
 export type CompatSeverity = "error" | "warning";
 
 export interface CompatFinding {
@@ -30,6 +32,9 @@ export interface CompatInput {
 }
 
 const enabled = (v: string | undefined, fallback = "1"): boolean => (v ?? fallback) === "1";
+
+/** version_at_least() in install-mods.sh. */
+const atLeast = (version: string, minimum: string): boolean => compareVersions(version, minimum) >= 0;
 
 /** Extract the Metamod build number from e.g. "2.0.0-git1411" -> 1411. */
 export function metamodBuild(version: string): number | null {
@@ -59,7 +64,7 @@ export function checkCompatibility(env: CompatInput): CompatFinding[] {
     return findings;
   }
 
-  const metamodVersion = env.METAMOD_VERSION ?? "2.0.0-git1411";
+  const metamodVersion = env.METAMOD_VERSION ?? "2.0.0-git1473";
   const build = metamodBuild(metamodVersion);
 
   if (build === null) {
@@ -72,10 +77,10 @@ export function checkCompatibility(env: CompatInput): CompatFinding[] {
     return findings;
   }
 
-  const cs2fixesVersion = env.CS2FIXES_VERSION ?? "v1.20.1";
-  const mamVersion = env.MULTIADDONMANAGER_VERSION ?? "v1.5.4";
-  const stripperVersion = env.STRIPPERCS2_VERSION ?? "v1.1.4";
-  const slpfVersion = env.SERVERLISTPLAYERSFIX_VERSION ?? "v1.0.8";
+  const cs2fixesVersion = env.CS2FIXES_VERSION ?? "v2.0";
+  const mamVersion = env.MULTIADDONMANAGER_VERSION ?? "v1.6.2";
+  const stripperVersion = env.STRIPPERCS2_VERSION ?? "v2.0.1";
+  const slpfVersion = env.SERVERLISTPLAYERSFIX_VERSION ?? "v2.0";
 
   if (cs2fixesEnabled && cs2fixesVersion === "v1.20.1" && build > 1411) {
     findings.push({
@@ -84,24 +89,31 @@ export function checkCompatibility(env: CompatInput): CompatFinding[] {
       keys: ["METAMOD_VERSION", "CS2FIXES_VERSION"],
     });
   }
-  if (mamEnabled && mamVersion === "v1.6" && build <= 1459) {
+  if (cs2fixesEnabled && atLeast(cs2fixesVersion, "v2.0") && build < 1470) {
     findings.push({
       severity: "error",
-      message: "MultiAddonManager v1.6 requires Metamod newer than build 1459",
+      message: `CS2Fixes ${cs2fixesVersion} requires Metamod build 1470 or later`,
+      keys: ["METAMOD_VERSION", "CS2FIXES_VERSION"],
+    });
+  }
+  if (mamEnabled && atLeast(mamVersion, "v1.6") && build <= 1459) {
+    findings.push({
+      severity: "error",
+      message: `MultiAddonManager ${mamVersion} requires Metamod newer than build 1459`,
       keys: ["METAMOD_VERSION", "MULTIADDONMANAGER_VERSION"],
     });
   }
-  if (stripperEnabled && stripperVersion === "v2.0" && build < 1461) {
+  if (stripperEnabled && atLeast(stripperVersion, "v2.0") && build < 1461) {
     findings.push({
       severity: "error",
-      message: "StripperCS2 v2.0 requires Metamod build 1461 or later",
+      message: `StripperCS2 ${stripperVersion} requires Metamod build 1461 or later`,
       keys: ["METAMOD_VERSION", "STRIPPERCS2_VERSION"],
     });
   }
-  if (slpfEnabled && slpfVersion === "v2.0" && build < 1461) {
+  if (slpfEnabled && atLeast(slpfVersion, "v2.0") && build < 1461) {
     findings.push({
       severity: "error",
-      message: "ServerListPlayersFix v2.0 requires Metamod build 1461 or later",
+      message: `ServerListPlayersFix ${slpfVersion} requires Metamod build 1461 or later`,
       keys: ["METAMOD_VERSION", "SERVERLISTPLAYERSFIX_VERSION"],
     });
   }

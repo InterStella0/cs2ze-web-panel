@@ -8,11 +8,11 @@ const valid = {
   INSTALL_MULTIADDONMANAGER: "1",
   INSTALL_STRIPPERCS2: "1",
   INSTALL_SERVERLISTPLAYERSFIX: "1",
-  METAMOD_VERSION: "2.0.0-git1411",
-  CS2FIXES_VERSION: "v1.20.1",
-  MULTIADDONMANAGER_VERSION: "v1.5.4",
-  STRIPPERCS2_VERSION: "v1.1.4",
-  SERVERLISTPLAYERSFIX_VERSION: "v1.0.8",
+  METAMOD_VERSION: "2.0.0-git1473",
+  CS2FIXES_VERSION: "v2.0",
+  MULTIADDONMANAGER_VERSION: "v1.6.2",
+  STRIPPERCS2_VERSION: "v2.0.1",
+  SERVERLISTPLAYERSFIX_VERSION: "v2.0",
   CS2_HOST_WORKSHOP_COLLECTION: "3222748625",
   CS2_PUBLISHED_PORT: "27015",
   CS2_RCON_PUBLISHED_PORT: "27050",
@@ -25,12 +25,12 @@ test("shared env validation accepts the supported release set", () => {
 
 test("shared env validation rejects boot blockers, unsafe values, ranges, and port collisions", () => {
   const findings = validateEnvPatch(valid, {
-    METAMOD_VERSION: "2.0.0-git1500",
+    METAMOD_VERSION: "2.0.0-git1411",
     CS2_MAXPLAYERS: "100",
     CS2_SERVERNAME: "bad$value",
     CS2_RCON_PUBLISHED_PORT: "27015",
   });
-  assert.ok(findings.some((finding) => /CS2Fixes v1\.20\.1/.test(finding.message)));
+  assert.ok(findings.some((finding) => /CS2Fixes v2\.0 requires/.test(finding.message)));
   assert.ok(findings.some((finding) => /at most 64/.test(finding.message)));
   assert.ok(findings.some((finding) => /interpolate/.test(finding.message)));
   assert.ok(findings.some((finding) => /assigned more than once/.test(finding.message)));

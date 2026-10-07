@@ -233,8 +233,8 @@ the boot if a download fails or a version pairing is unsupported:
 - A version is only offered if the panel has seen that release upstream with an
   archive whose name matches the URL the installer builds.
 - The resulting version set is checked against the compatibility rules in
-  [Version compatibility](#version-compatibility). Raising Metamod past build
-  1411 while CS2Fixes stays on v1.20.1 is refused, with the same message the
+  [Version compatibility](#version-compatibility). Moving CS2Fixes to v2.0
+  while Metamod stays below build 1470 is refused, with the same message the
   installer would print.
 
 The update checker polls upstream on a schedule (12 hours by default) and
@@ -352,21 +352,22 @@ rsync -a --delete \
 
 ## Version compatibility
 
-The plugin versions in `.env.example` are pinned as a compatible set. As of
-2026-09-24, upstream has split into two lanes that do not share a Metamod build:
+The plugin versions in `.env.example` are pinned as a compatible set. Upstream
+has split into two lanes that do not share a Metamod build:
 
 - CS2Fixes v1.20.1 requires Metamod 2.0 build 1411 or earlier.
+- CS2Fixes v2.0 and later require build 1470 or later.
 - MultiAddonManager v1.6 and later require a build newer than 1459.
 - StripperCS2 v2.0 and later require build 1461 or later.
 - ServerListPlayersFix v2.0 and later require build 1461 or later.
 
-Because CS2Fixes pins the ceiling at build 1411, the whole stack stays on the
-pre-KHook lane. The defaults therefore use Metamod build 1411, CS2Fixes v1.20.1,
-MultiAddonManager v1.5.4, StripperCS2 v1.1.4, and ServerListPlayersFix v1.0.8.
-StripperCS2 v1.1.4 is the
-backport that carries the 2026-09-22 lump data offset without moving off build
-1411. Upgrade these components as a tested set rather than changing one version
-independently. The Plugins page enforces exactly these rules before it writes a
+Since CS2Fixes v2.0 (2026-09-30) the whole stack runs on the KHook lane. The
+defaults therefore use Metamod build 1473, CS2Fixes v2.0, MultiAddonManager
+v1.6.2, StripperCS2 v2.0.1, and ServerListPlayersFix v2.0. An existing `.env`
+still pinned to the pre-KHook set (Metamod build 1411, CS2Fixes v1.20.1,
+MultiAddonManager v1.5.4, StripperCS2 v1.1.4, ServerListPlayersFix v1.0.8)
+keeps booting, but has to move all five together. Upgrade these components as
+a tested set rather than changing one version independently. The Plugins page enforces exactly these rules before it writes a
 version, so a combination that cannot boot is refused there rather than at the
 next container start.
 

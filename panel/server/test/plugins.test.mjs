@@ -122,7 +122,7 @@ test("marker URLs resolve back to the installed version", () => {
 });
 
 test("a selection that cannot boot is rejected by the same rules as the installer", () => {
-  // The panel's own pin: CS2Fixes v1.20.1 cannot load a Metamod newer than 1411.
+  // The pre-KHook pin: CS2Fixes v1.20.1 cannot load a Metamod newer than 1411.
   const findings = checkCompatibility({
     METAMOD_VERSION: "2.0.0-git1461",
     CS2FIXES_VERSION: "v1.20.1",
@@ -141,6 +141,19 @@ test("a selection that cannot boot is rejected by the same rules as the installe
   // ServerListPlayersFix v2.0 moved to KHook and needs the newer Metamod lane.
   assert.ok(checkCompatibility({ METAMOD_VERSION: "2.0.0-git1411", SERVERLISTPLAYERSFIX_VERSION: "v2.0" })
     .some((finding) => finding.severity === "error" && finding.keys.includes("SERVERLISTPLAYERSFIX_VERSION")));
+  // CS2Fixes v2.0 and its patch releases moved to KHook and need build 1470 or later.
+  for (const cs2fixes of ["v2.0", "v2.0.1"]) {
+    assert.ok(checkCompatibility({ METAMOD_VERSION: "2.0.0-git1461", CS2FIXES_VERSION: cs2fixes })
+      .some((finding) => finding.severity === "error" && finding.message === `CS2Fixes ${cs2fixes} requires Metamod build 1470 or later`));
+  }
+  // The shipped defaults are a set that boots together.
+  assert.deepEqual(checkCompatibility({}), []);
+  // Later patch releases of the other KHook plugins are held to the same floor.
+  assert.deepEqual(
+    checkCompatibility({ METAMOD_VERSION: "2.0.0-git1411", CS2FIXES_VERSION: "v1.20.1", MULTIADDONMANAGER_VERSION: "v1.6.2", STRIPPERCS2_VERSION: "v2.0.1", SERVERLISTPLAYERSFIX_VERSION: "v2.0" })
+      .map((finding) => finding.keys[1]),
+    ["MULTIADDONMANAGER_VERSION", "STRIPPERCS2_VERSION", "SERVERLISTPLAYERSFIX_VERSION"],
+  );
   assert.ok(checkCompatibility({ METAMOD_VERSION: "2.0.0-git1411", INSTALL_CS2FIXES: "0", INSTALL_MULTIADDONMANAGER: "0", INSTALL_STRIPPERCS2: "0", INSTALL_METAMOD: "0" })
     .some((finding) => finding.message.includes("Metamod cannot be disabled")), "ServerListPlayersFix alone still needs Metamod");
 });

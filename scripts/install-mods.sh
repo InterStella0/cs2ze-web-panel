@@ -171,6 +171,11 @@
     log "disabled Metamod in gameinfo.gi"
   }
 
+  # True when version $1 is $2 or newer, ignoring a leading "v".
+  version_at_least() {
+    [ "$(printf '%s\n%s\n' "${2#v}" "${1#v}" | sort -V | head -n 1)" = "${2#v}" ]
+  }
+
   check_known_compatibility() {
     local build="${metamod_version##*git}"
 
@@ -185,16 +190,20 @@
       log "CS2Fixes v1.20.1 requires Metamod build 1411 or earlier"
       return 1
     fi
-    if enabled "${INSTALL_MULTIADDONMANAGER:-1}" && [ "$mam_version" = "v1.6" ] && [ "$build" -le 1459 ]; then
-      log "MultiAddonManager v1.6 requires Metamod newer than build 1459"
+    if enabled "${INSTALL_CS2FIXES:-1}" && version_at_least "$cs2fixes_version" v2.0 && [ "$build" -lt 1470 ]; then
+      log "CS2Fixes $cs2fixes_version requires Metamod build 1470 or later"
       return 1
     fi
-    if enabled "${INSTALL_STRIPPERCS2:-1}" && [ "$stripper_version" = "v2.0" ] && [ "$build" -lt 1461 ]; then
-      log "StripperCS2 v2.0 requires Metamod build 1461 or later"
+    if enabled "${INSTALL_MULTIADDONMANAGER:-1}" && version_at_least "$mam_version" v1.6 && [ "$build" -le 1459 ]; then
+      log "MultiAddonManager $mam_version requires Metamod newer than build 1459"
       return 1
     fi
-    if enabled "${INSTALL_SERVERLISTPLAYERSFIX:-1}" && [ "$slpf_version" = "v2.0" ] && [ "$build" -lt 1461 ]; then
-      log "ServerListPlayersFix v2.0 requires Metamod build 1461 or later"
+    if enabled "${INSTALL_STRIPPERCS2:-1}" && version_at_least "$stripper_version" v2.0 && [ "$build" -lt 1461 ]; then
+      log "StripperCS2 $stripper_version requires Metamod build 1461 or later"
+      return 1
+    fi
+    if enabled "${INSTALL_SERVERLISTPLAYERSFIX:-1}" && version_at_least "$slpf_version" v2.0 && [ "$build" -lt 1461 ]; then
+      log "ServerListPlayersFix $slpf_version requires Metamod build 1461 or later"
       return 1
     fi
   }
@@ -503,24 +512,24 @@
     log "configured MultiAddonManager"
   }
 
-  metamod_version="${METAMOD_VERSION:-2.0.0-git1411}"
+  metamod_version="${METAMOD_VERSION:-2.0.0-git1473}"
   metamod_urls="${METAMOD_URL:-https://mms.alliedmods.net/mmsdrop/2.0/mmsource-${metamod_version}-linux.tar.gz}"
-  cs2fixes_version="${CS2FIXES_VERSION:-v1.20.1}"
+  cs2fixes_version="${CS2FIXES_VERSION:-v2.0}"
   cs2fixes_runtime="${CS2FIXES_RUNTIME:-steamrt3}"
   cs2fixes_urls="${CS2FIXES_URL:-$(printf '%s\n%s' \
     "https://github.com/Source2ZE/CS2Fixes/releases/download/${cs2fixes_version}/CS2Fixes-${cs2fixes_version}-${cs2fixes_runtime}.tar.gz" \
     "https://github.com/Source2ZE/CS2Fixes/releases/download/${cs2fixes_version}/CS2Fixes-${cs2fixes_version}-linux.tar.gz")}"
-  mam_version="${MULTIADDONMANAGER_VERSION:-v1.5.4}"
+  mam_version="${MULTIADDONMANAGER_VERSION:-v1.6.2}"
   mam_runtime="${MULTIADDONMANAGER_RUNTIME:-steamrt3}"
   mam_urls="${MULTIADDONMANAGER_URL:-$(printf '%s\n%s' \
     "https://github.com/Source2ZE/MultiAddonManager/releases/download/${mam_version}/MultiAddonManager-${mam_version}-${mam_runtime}.tar.gz" \
     "https://github.com/Source2ZE/MultiAddonManager/releases/download/${mam_version}/MultiAddonManager-${mam_version}-linux.tar.gz")}"
-  stripper_version="${STRIPPERCS2_VERSION:-v1.1.4}"
+  stripper_version="${STRIPPERCS2_VERSION:-v2.0.1}"
   stripper_runtime="${STRIPPERCS2_RUNTIME:-steamrt3}"
   stripper_urls="${STRIPPERCS2_URL:-$(printf '%s\n%s' \
     "https://github.com/Source2ZE/StripperCS2/releases/download/${stripper_version}/StripperCS2-${stripper_version}-${stripper_runtime}.tar.gz" \
     "https://github.com/Source2ZE/StripperCS2/releases/download/${stripper_version}/StripperCS2-${stripper_version#v}.zip")}"
-  slpf_version="${SERVERLISTPLAYERSFIX_VERSION:-v1.0.8}"
+  slpf_version="${SERVERLISTPLAYERSFIX_VERSION:-v2.0}"
   slpf_runtime="${SERVERLISTPLAYERSFIX_RUNTIME:-steamrt3}"
   slpf_urls="${SERVERLISTPLAYERSFIX_URL:-$(printf '%s\n%s' \
     "https://github.com/Source2ZE/ServerListPlayersFix/releases/download/${slpf_version}/ServerListPlayersFix-${slpf_version}-${slpf_runtime}.tar.gz" \

@@ -35,7 +35,7 @@ async function startRcon() {
     c_timeleft: "[CS2Fixes] Timeleft: 12:34",
     c_nextmap: "Next map is: ze_next",
     c_who: "Admin #12 76561190000000000",
-    "meta list": "[01] CS2Fixes (1.20.1) by Vauff\n[02] StripperCS2 (1.1.3) by Vauff\n[03] MultiAddonManager (1.5.4) by Source2ZE\n[04] ServerListPlayersFix (1.0.8) by Poggu",
+    "meta list": "[01] CS2Fixes (2.0) by Vauff\n[02] StripperCS2 (2.0.1) by Vauff\n[03] MultiAddonManager (1.6.2) by Source2ZE\n[04] ServerListPlayersFix (2.0) by Poggu",
     cvarlist: cvars,
   };
   const server = net.createServer((socket) => {
@@ -99,7 +99,7 @@ test("Step 3/4/5 routes enforce auth and safely manage runtime plus catalog data
   await Promise.all([projectDir, dataDir, binDir, logDir, configDir, liveConfigDir, classConfigDir, liveClassConfigDir].map((directory) => fs.mkdir(directory, { recursive: true })));
   const composeFile = path.join(projectDir, "compose.yaml");
   await fs.writeFile(composeFile, "services: {}\n");
-  await fs.writeFile(path.join(projectDir, ".env"), "# preserved comment\nCS2_RCONPW=secret\nZE_ROUND_TIME=60\nZE_ROUND_MONEY=16000\nCS2_MAXPLAYERS=32\nCS2_HOST_WORKSHOP_COLLECTION=3222748625\nMETAMOD_VERSION=2.0.0-git1411\nCS2FIXES_VERSION=v1.20.1\n");
+  await fs.writeFile(path.join(projectDir, ".env"), "# preserved comment\nCS2_RCONPW=secret\nZE_ROUND_TIME=60\nZE_ROUND_MONEY=16000\nCS2_MAXPLAYERS=32\nCS2_HOST_WORKSHOP_COLLECTION=3222748625\nMETAMOD_VERSION=2.0.0-git1473\nCS2FIXES_VERSION=v2.0\n");
   await fs.writeFile(path.join(logDir, "L-test.log"), "\x1b[32mgame ready\x1b[0m\r\n");
   const initialMaps = '{"Groups":{},"Maps":{"ze_integration":{"enabled":true,"workshop_id":123}}}\n';
   const initialAdmins = '{"Groups":{},"Admins":{"0":{"name":"Unconfigured placeholder","flags":"","immunity":0}}}\n';
@@ -117,7 +117,7 @@ test("Step 3/4/5 routes enforce auth and safely manage runtime plus catalog data
     "com.docker.compose.project.working_dir": projectDir,
     "com.docker.compose.project.config_files": composeFile,
   } } }];
-  const serverInspect = [{ Config: { Image: "fake/cs2:test", Env: ["CS2_RCONPW=secret", "ZE_ROUND_TIME=60", "CS2_MAXPLAYERS=32", "METAMOD_VERSION=2.0.0-git1411", "CS2FIXES_VERSION=v1.20.1"] }, State: {
+  const serverInspect = [{ Config: { Image: "fake/cs2:test", Env: ["CS2_RCONPW=secret", "ZE_ROUND_TIME=60", "CS2_MAXPLAYERS=32", "METAMOD_VERSION=2.0.0-git1473", "CS2FIXES_VERSION=v2.0"] }, State: {
     Status: "running", Running: true, StartedAt: "2026-09-15T12:00:00Z", Health: { Status: "healthy" },
   } }];
   const dockerScript = `#!/usr/bin/env node
@@ -248,12 +248,12 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
 
   const invalid = await fetch(`${baseUrl}/api/env/validate`, {
     method: "POST", headers: { "content-type": "application/json", cookie, "x-cs2ze-csrf": auth.csrfToken },
-    body: JSON.stringify({ changes: { METAMOD_VERSION: "2.0.0-git1500" }, applyLive: true }),
+    body: JSON.stringify({ changes: { METAMOD_VERSION: "2.0.0-git1411" }, applyLive: true }),
   });
   assert.equal(invalid.status, 200);
   const invalidResult = await invalid.json();
   assert.equal(invalidResult.valid, false);
-  assert.match(invalidResult.findings[0].message, /CS2Fixes v1\.20\.1/);
+  assert.match(invalidResult.findings[0].message, /CS2Fixes v2\.0 requires/);
 
   assert.equal((await fetch(`${baseUrl}/api/env`, {
     method: "PATCH", headers: { "content-type": "application/json", cookie },
@@ -368,16 +368,16 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   const pluginsResponse = await (await get("/api/plugins")).json();
   assert.equal(pluginsResponse.plugins.length, 5);
   const cs2fixesPlugin = pluginsResponse.plugins.find((item) => item.id === "cs2fixes");
-  assert.equal(cs2fixesPlugin.configuredVersion, "v1.20.1");
+  assert.equal(cs2fixesPlugin.configuredVersion, "v2.0");
   assert.equal(cs2fixesPlugin.installedVersion, "v1.19.0");
   assert.equal(cs2fixesPlugin.pendingInstall, true);
-  assert.equal(cs2fixesPlugin.loadedVersion, "1.20.1");
+  assert.equal(cs2fixesPlugin.loadedVersion, "2.0");
   // Nothing has been fetched from upstream in this test, so no version may be
   // offered and no update may be claimed.
   assert.equal(cs2fixesPlugin.latestVersion, null);
   assert.equal(cs2fixesPlugin.updateAvailable, false);
   assert.equal(pluginsResponse.plugins.find((item) => item.id === "metamod").installedVersion, null);
-  assert.equal(pluginsResponse.plugins.find((item) => item.id === "serverlistplayersfix").loadedVersion, "1.0.8");
+  assert.equal(pluginsResponse.plugins.find((item) => item.id === "serverlistplayersfix").loadedVersion, "2.0");
   assert.equal(pluginsResponse.settings.autoApply, false);
 
   // Fail-closed: a version the panel has not seen upstream is refused rather
@@ -387,9 +387,9 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   assert.match((await unseen.json()).error, /not a release the panel has seen/);
   assert.equal((await fetch(`${baseUrl}/api/plugins/update`, {
     method: "POST", headers: { "content-type": "application/json", cookie },
-    body: JSON.stringify({ selections: [{ id: "cs2fixes", version: "v1.20.1" }], apply: false }),
+    body: JSON.stringify({ selections: [{ id: "cs2fixes", version: "v2.0" }], apply: false }),
   })).status, 403);
-  assert.match(await fs.readFile(path.join(projectDir, ".env"), "utf8"), /^CS2FIXES_VERSION=v1\.20\.1$/m);
+  assert.match(await fs.readFile(path.join(projectDir, ".env"), "utf8"), /^CS2FIXES_VERSION=v2\.0$/m);
 
   const savedUpdater = await mutateWith("PUT", "/api/plugins/settings", {
     checkEnabled: true, checkIntervalHours: 6, autoApply: true,
@@ -400,12 +400,12 @@ else { console.error("unsupported", args.join(" ")); process.exit(1); }
   assert.equal((await mutateWith("PUT", "/api/plugins/settings", { ...DEFAULT_PLUGIN_UPDATE_SETTINGS, checkIntervalHours: 0 })).status, 400);
   assert.equal((await (await get("/api/plugins")).json()).settings.autoApplyPlugins[0], "cs2fixes");
 
-  await fs.writeFile(path.join(projectDir, ".env"), writtenEnv.replace("METAMOD_VERSION=2.0.0-git1411", "METAMOD_VERSION=2.0.0-git1500"));
+  await fs.writeFile(path.join(projectDir, ".env"), writtenEnv.replace("METAMOD_VERSION=2.0.0-git1473", "METAMOD_VERSION=2.0.0-git1411"));
   const blockedApply = await fetch(`${baseUrl}/api/server/apply`, {
     method: "POST", headers: { cookie, "x-cs2ze-csrf": auth.csrfToken },
   });
   assert.equal(blockedApply.status, 400);
-  assert.match((await blockedApply.json()).error, /CS2Fixes v1\.20\.1/);
+  assert.match((await blockedApply.json()).error, /CS2Fixes v2\.0 requires/);
 
   const database = new DatabaseSync(path.join(dataDir, "panel.db"), { readOnly: false });
   const audit = database.prepare("SELECT target, detail FROM audit WHERE action = 'rcon.exec' ORDER BY id DESC LIMIT 1").get();
