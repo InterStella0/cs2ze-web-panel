@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { ENV_SCHEMA_BY_KEY, requiresRestart, unescapeEnvSlashes, type DriftResponse } from "@cs2ze/shared";
@@ -50,9 +51,15 @@ async function walkFiles(directory: string, prefix: string): Promise<string[]> {
   return files;
 }
 
+/** CS2Fixes v2.1 moved its cfgs from cfg/cs2fixes to addons/cs2fixes/cfg; follow what is installed. */
+function cs2fixesCfgDir(): string {
+  const moved = path.join(config.cs2DataDir, "game/csgo/addons/cs2fixes/cfg");
+  return existsSync(path.join(moved, "cs2fixes.cfg")) ? moved : path.join(config.cs2DataDir, "game/csgo/cfg/cs2fixes");
+}
+
 function livePathFor(relative: string): string | null {
   if (relative.startsWith("server-config/cs2fixes/maps/")) {
-    return path.join(config.cs2DataDir, "game/csgo/cfg/cs2fixes/maps", relative.slice("server-config/cs2fixes/maps/".length));
+    return path.join(cs2fixesCfgDir(), "maps", relative.slice("server-config/cs2fixes/maps/".length));
   }
   if (relative.startsWith("server-config/cs2fixes/")) {
     return path.join(config.cs2DataDir, "game/csgo/addons/cs2fixes/configs", relative.slice("server-config/cs2fixes/".length));

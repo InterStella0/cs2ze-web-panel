@@ -64,7 +64,7 @@ export function checkCompatibility(env: CompatInput): CompatFinding[] {
     return findings;
   }
 
-  const metamodVersion = env.METAMOD_VERSION ?? "2.0.0-git1473";
+  const metamodVersion = env.METAMOD_VERSION ?? "2.0.0-git1483";
   const build = metamodBuild(metamodVersion);
 
   if (build === null) {
@@ -77,10 +77,10 @@ export function checkCompatibility(env: CompatInput): CompatFinding[] {
     return findings;
   }
 
-  const cs2fixesVersion = env.CS2FIXES_VERSION ?? "v2.0";
-  const mamVersion = env.MULTIADDONMANAGER_VERSION ?? "v1.6.2";
+  const cs2fixesVersion = env.CS2FIXES_VERSION ?? "v2.1";
+  const mamVersion = env.MULTIADDONMANAGER_VERSION ?? "v1.7.3";
   const stripperVersion = env.STRIPPERCS2_VERSION ?? "v2.0.1";
-  const slpfVersion = env.SERVERLISTPLAYERSFIX_VERSION ?? "v2.0";
+  const slpfVersion = env.SERVERLISTPLAYERSFIX_VERSION ?? "v2.1";
 
   if (cs2fixesEnabled && cs2fixesVersion === "v1.20.1" && build > 1411) {
     findings.push({

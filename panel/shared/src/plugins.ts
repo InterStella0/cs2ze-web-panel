@@ -48,7 +48,7 @@ export const PLUGIN_SPECS: readonly PluginSpec[] = [
     installKey: "INSTALL_METAMOD",
     versionKey: "METAMOD_VERSION",
     urlKey: "METAMOD_URL",
-    defaultVersion: "2.0.0-git1473",
+    defaultVersion: "2.0.0-git1483",
   },
   {
     id: "cs2fixes",
@@ -61,7 +61,7 @@ export const PLUGIN_SPECS: readonly PluginSpec[] = [
     versionKey: "CS2FIXES_VERSION",
     urlKey: "CS2FIXES_URL",
     runtimeKey: "CS2FIXES_RUNTIME",
-    defaultVersion: "v2.0",
+    defaultVersion: "v2.1",
     defaultRuntime: "steamrt3",
   },
   {
@@ -75,7 +75,7 @@ export const PLUGIN_SPECS: readonly PluginSpec[] = [
     versionKey: "MULTIADDONMANAGER_VERSION",
     urlKey: "MULTIADDONMANAGER_URL",
     runtimeKey: "MULTIADDONMANAGER_RUNTIME",
-    defaultVersion: "v1.6.2",
+    defaultVersion: "v1.7.3",
     defaultRuntime: "steamrt3",
   },
   {
@@ -103,7 +103,7 @@ export const PLUGIN_SPECS: readonly PluginSpec[] = [
     versionKey: "SERVERLISTPLAYERSFIX_VERSION",
     urlKey: "SERVERLISTPLAYERSFIX_URL",
     runtimeKey: "SERVERLISTPLAYERSFIX_RUNTIME",
-    defaultVersion: "v2.0",
+    defaultVersion: "v2.1",
     defaultRuntime: "steamrt3",
   },
 ];

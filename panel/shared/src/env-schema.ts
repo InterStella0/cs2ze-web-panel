@@ -120,7 +120,7 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "CS2_BOT_QUOTA_MODE", group: "bots", label: "Bot quota mode", description: "normal keeps a fixed bot count; fill adds bots until the quota's total player count is reached; match adds this many bots per human.", type: "select", options: ["normal", "fill", "match"], default: "fill", cvar: "bot_quota_mode" },
   { key: "CS2_BOT_DIFFICULTY", group: "bots", label: "Bot difficulty", description: "0 easy, 1 normal, 2 hard, 3 expert. Leave blank to use the game default.", type: "string", default: "", cvar: "bot_difficulty", advanced: true },
 
-  // ---- Round / map rules (written to cfg/cs2fixes/server.cfg) ---------------
+  // ---- Round / map rules (written to the CS2Fixes server settings) ---------------
   { key: "ZE_MAP_TIME_LIMIT", group: "gameplay", label: "Map time limit (min)", type: "number", default: "40", min: 0, max: 600, cvar: "mp_timelimit" },
   { key: "ZE_ROUND_TIME", group: "gameplay", label: "Round time (min)", type: "number", default: "60", min: 1, max: 600, cvar: "mp_roundtime" },
   { key: "ZE_FREEZE_TIME", group: "gameplay", label: "Freeze time (s)", type: "number", default: "5", min: 0, max: 120, cvar: "mp_freezetime" },
@@ -209,14 +209,14 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
 
   // ---- Mods ----------------------------------------------------------------
   { key: "INSTALL_METAMOD", group: "mods", label: "Install Metamod", type: "boolean01", default: "1", restartRequired: true },
-  { key: "METAMOD_VERSION", group: "mods", label: "Metamod version", type: "string", default: "2.0.0-git1473", restartRequired: true },
+  { key: "METAMOD_VERSION", group: "mods", label: "Metamod version", type: "string", default: "2.0.0-git1483", restartRequired: true },
   { key: "METAMOD_URL", group: "mods", label: "Metamod URL override", type: "string", default: "", restartRequired: true, slashEscaped: false, advanced: true },
   { key: "INSTALL_CS2FIXES", group: "mods", label: "Install CS2Fixes", type: "boolean01", default: "1", restartRequired: true },
-  { key: "CS2FIXES_VERSION", group: "mods", label: "CS2Fixes version", type: "string", default: "v2.0", restartRequired: true },
+  { key: "CS2FIXES_VERSION", group: "mods", label: "CS2Fixes version", type: "string", default: "v2.1", restartRequired: true },
   { key: "CS2FIXES_RUNTIME", group: "mods", label: "CS2Fixes runtime", type: "select", options: ["steamrt3", "steamrt4"], default: "steamrt3", restartRequired: true, advanced: true },
   { key: "CS2FIXES_URL", group: "mods", label: "CS2Fixes URL override", type: "string", default: "", restartRequired: true, advanced: true },
   { key: "INSTALL_MULTIADDONMANAGER", group: "mods", label: "Install MultiAddonManager", type: "boolean01", default: "1", restartRequired: true },
-  { key: "MULTIADDONMANAGER_VERSION", group: "mods", label: "MultiAddonManager version", type: "string", default: "v1.6.2", restartRequired: true },
+  { key: "MULTIADDONMANAGER_VERSION", group: "mods", label: "MultiAddonManager version", type: "string", default: "v1.7.3", restartRequired: true },
   { key: "MULTIADDONMANAGER_RUNTIME", group: "mods", label: "MultiAddonManager runtime", type: "select", options: ["steamrt3", "steamrt4"], default: "steamrt3", restartRequired: true, advanced: true },
   { key: "MULTIADDONMANAGER_URL", group: "mods", label: "MultiAddonManager URL override", type: "string", default: "", restartRequired: true, advanced: true },
   { key: "INSTALL_STRIPPERCS2", group: "mods", label: "Install StripperCS2", type: "boolean01", default: "1", restartRequired: true },
@@ -224,7 +224,7 @@ export const ENV_SCHEMA: EnvKeySpec[] = [
   { key: "STRIPPERCS2_RUNTIME", group: "mods", label: "StripperCS2 runtime", description: "Only used by releases from v1.1.4 onward; earlier releases ship a single runtime-less archive.", type: "select", options: ["steamrt3", "steamrt4"], default: "steamrt3", restartRequired: true, advanced: true },
   { key: "STRIPPERCS2_URL", group: "mods", label: "StripperCS2 URL override", type: "string", default: "", restartRequired: true, advanced: true },
   { key: "INSTALL_SERVERLISTPLAYERSFIX", group: "mods", label: "Install ServerListPlayersFix", description: "Makes connected players show up in the Steam server browser.", type: "boolean01", default: "1", restartRequired: true },
-  { key: "SERVERLISTPLAYERSFIX_VERSION", group: "mods", label: "ServerListPlayersFix version", type: "string", default: "v2.0", restartRequired: true },
+  { key: "SERVERLISTPLAYERSFIX_VERSION", group: "mods", label: "ServerListPlayersFix version", type: "string", default: "v2.1", restartRequired: true },
   { key: "SERVERLISTPLAYERSFIX_RUNTIME", group: "mods", label: "ServerListPlayersFix runtime", description: "Only used by releases from v2.0 onward; earlier releases ship a single linux archive.", type: "select", options: ["steamrt3", "steamrt4"], default: "steamrt3", restartRequired: true, advanced: true },
   { key: "SERVERLISTPLAYERSFIX_URL", group: "mods", label: "ServerListPlayersFix URL override", type: "string", default: "", restartRequired: true, advanced: true },
   { key: "MODS_FORCE_REINSTALL", group: "mods", label: "Force re-download on next start", description: "Set to 1 for one start to download all enabled mod archives again, then set it back to 0.", type: "boolean01", default: "0", restartRequired: true },

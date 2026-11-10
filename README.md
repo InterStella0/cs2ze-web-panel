@@ -362,8 +362,14 @@ has split into two lanes that do not share a Metamod build:
 - ServerListPlayersFix v2.0 and later require build 1461 or later.
 
 Since CS2Fixes v2.0 (2026-09-30) the whole stack runs on the KHook lane. The
-defaults therefore use Metamod build 1473, CS2Fixes v2.0, MultiAddonManager
-v1.6.2, StripperCS2 v2.0.1, and ServerListPlayersFix v2.0. An existing `.env`
+defaults therefore use Metamod build 1483, CS2Fixes v2.1, MultiAddonManager
+v1.7.3, StripperCS2 v2.0.1, and ServerListPlayersFix v2.1, the releases rebuilt
+for the 2026-10-22 CS2 update (build 1483 was the newest Metamod when they
+shipped). CS2Fixes v2.1 moved
+its cfgs from `cfg/cs2fixes` to `addons/cs2fixes/cfg` and dropped the custom
+`server.cfg`; the installer follows whichever layout the installed archive has,
+and from v2.1 writes the round/map rules into a managed block at the end of
+`addons/cs2fixes/cfg/cs2fixes.cfg`. An existing `.env`
 still pinned to the pre-KHook set (Metamod build 1411, CS2Fixes v1.20.1,
 MultiAddonManager v1.5.4, StripperCS2 v1.1.4, ServerListPlayersFix v1.0.8)
 keeps booting, but has to move all five together. Upgrade these components as

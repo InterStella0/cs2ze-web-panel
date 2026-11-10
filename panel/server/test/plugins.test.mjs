@@ -142,7 +142,7 @@ test("a selection that cannot boot is rejected by the same rules as the installe
   assert.ok(checkCompatibility({ METAMOD_VERSION: "2.0.0-git1411", SERVERLISTPLAYERSFIX_VERSION: "v2.0" })
     .some((finding) => finding.severity === "error" && finding.keys.includes("SERVERLISTPLAYERSFIX_VERSION")));
   // CS2Fixes v2.0 and its patch releases moved to KHook and need build 1470 or later.
-  for (const cs2fixes of ["v2.0", "v2.0.1"]) {
+  for (const cs2fixes of ["v2.0", "v2.0.1", "v2.1"]) {
     assert.ok(checkCompatibility({ METAMOD_VERSION: "2.0.0-git1461", CS2FIXES_VERSION: cs2fixes })
       .some((finding) => finding.severity === "error" && finding.message === `CS2Fixes ${cs2fixes} requires Metamod build 1470 or later`));
   }

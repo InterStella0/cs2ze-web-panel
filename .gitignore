@@ -8,3 +8,5 @@ panel/server/dist/
 panel/shared/dist/
 .idea/
 server-config/
+.env.*
+!.env.example
